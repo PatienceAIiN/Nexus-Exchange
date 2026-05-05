@@ -396,8 +396,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
-  avatarUrl(seed: string): string {
-    return `https://api.dicebear.com/8.x/notionists/svg?seed=${encodeURIComponent(seed || 'default')}`;
+  avatarUrl(seed: string | undefined | null): string {
+    const s = seed || this.user?.username || 'default';
+    return `https://api.dicebear.com/9.x/notionists/svg?seed=${encodeURIComponent(s)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
   }
 
   dismissToast(id: number): void { this.toastSvc.dismiss(id); }

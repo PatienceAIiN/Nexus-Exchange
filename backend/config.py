@@ -22,10 +22,10 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str = ""
 
     SMTP_HOST: str = "smtpout.secureserver.net"
-    SMTP_PORT: int = 465
+    SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASS: str = ""
-    SMTP_SECURE: bool = True
+    SMTP_SECURE: bool = False
     SMTP_SENDER_NAME: str = "Nexus Exchange"
     CONTACT_TO_EMAIL: str = ""
     SITE_URL: str = "http://localhost:8000"

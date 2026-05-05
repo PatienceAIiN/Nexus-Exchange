@@ -17,7 +17,7 @@ def send_email(to: str, subject: str, html_body: str) -> bool:
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = f"{settings.SMTP_SENDER_NAME} <{settings.SMTP_USER}>"
+        msg["From"] = settings.SMTP_USER
         msg["To"] = to
 
         part = MIMEText(html_body, "html")
