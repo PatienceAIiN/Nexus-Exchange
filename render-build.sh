@@ -9,7 +9,8 @@ npm install
 npm run build
 cd ..
 
-# Ensure backend/static exists
+# Ensure backend/static exists and is clean
+rm -rf backend/static/*
 mkdir -p backend/static
 
 # Move built files to backend/static
