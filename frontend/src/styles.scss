@@ -289,3 +289,29 @@ table {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--bg-secondary); }
 ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 3px; }
+
+// Responsive Utilities
+@media (max-width: 768px) {
+  .card { padding: 16px; }
+  .btn { padding: 8px 16px; }
+  .modal { padding: 24px; width: 95%; }
+  
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    margin-bottom: 1rem;
+    
+    table {
+      min-width: 600px; // Ensure table doesn't get too squashed
+    }
+  }
+}
+
+.mt-8 { margin-top: 8px; }
+.mt-16 { margin-top: 16px; }
+.mt-24 { margin-top: 24px; }
+.mb-24 { margin-bottom: 24px; }
+.w-full { width: 100%; }
+.text-sm { font-size: 12px; }
+.text-secondary { color: var(--text-secondary); }
