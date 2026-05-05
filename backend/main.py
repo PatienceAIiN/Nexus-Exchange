@@ -173,11 +173,22 @@ async def websocket_rates(websocket: WebSocket):
 
 # Serve Angular static files if dist exists
 static_path = settings.FRONTEND_DIST_PATH
-if os.path.exists(static_path):
+# Fallback to ./static if configured path doesn't exist
+if not os.path.exists(static_path):
+    static_path = "./static"
+
+if os.path.exists(static_path) and any(os.path.isfile(os.path.join(static_path, f)) for f in ["index.html", "browser/index.html"]):
+    # Check if we need to go one level deeper (for local dev with /browser/ subfolder)
+    if not os.path.isfile(os.path.join(static_path, "index.html")) and os.path.isdir(os.path.join(static_path, "browser")):
+        static_path = os.path.join(static_path, "browser")
+    
+    logger.info(f"Serving frontend from: {static_path}")
+    
     # Mount static assets
-    assets_path = f"{static_path}/assets"
+    assets_path = os.path.join(static_path, "assets")
     if os.path.exists(assets_path):
         app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+    
     # Mount full static dir for JS/CSS chunks
     app.mount("/static-files", StaticFiles(directory=static_path), name="static-files")
 
@@ -187,11 +198,15 @@ if os.path.exists(static_path):
         file_path = os.path.join(static_path, full_path)
         if full_path and os.path.isfile(file_path):
             return FileResponse(file_path)
-        index = f"{static_path}/index.html"
+        
+        # Fallback to index.html for SPA routing
+        index = os.path.join(static_path, "index.html")
         if os.path.exists(index):
             return FileResponse(index)
-        return JSONResponse({"message": "Nexus Exchange API is running. Frontend not built."})
+        
+        return JSONResponse({"message": "Nexus Exchange API is running. Frontend index.html not found."})
 else:
+    logger.warning(f"Frontend static path not found or empty: {static_path}")
     @app.get("/", include_in_schema=False)
     async def root():
         return {"message": "Nexus Exchange API is running", "docs": "/docs"}
