@@ -1,7 +1,7 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from contextlib import asynccontextmanager
 from sqlalchemy import select, text
 import os, json, logging
@@ -161,6 +161,18 @@ app.include_router(admin_routes.router)
 app.include_router(rates_routes.router)
 app.include_router(processing_routes.router)
 app.include_router(profile_routes.router)
+
+@app.middleware("http")
+async def domain_redirect_middleware(request: Request, call_next):
+    host = request.headers.get("host", "")
+    # Redirect if request comes from onrender.com and a custom SITE_URL is set (and it's not localhost)
+    if "onrender.com" in host and "patienceai.in" in settings.SITE_URL:
+        # Extract domain from SITE_URL (e.g., https://nexusexchange.patienceai.in -> nexusexchange.patienceai.in)
+        target_host = settings.SITE_URL.split("://")[-1].rstrip("/")
+        if host != target_host:
+            target_url = str(request.url).replace(host, target_host)
+            return RedirectResponse(url=target_url, status_code=301)
+    return await call_next(request)
 
 @app.websocket("/ws/rates")
 async def websocket_rates(websocket: WebSocket):
