@@ -443,3 +443,30 @@
   transition: width 0.3s ease-out;
   z-index: 0;
 }
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+
+  input {
+    width: 100%;
+    padding-right: 40px !important;
+  }
+
+  .eye-toggle {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+
+    &:hover { opacity: 1; }
+  }
+}

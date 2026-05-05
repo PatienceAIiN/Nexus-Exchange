@@ -70,6 +70,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   oldPwd = ''; newPwd = ''; confirmPwd = '';
   changingPassword = false;
   pwdError = '';
+  showOldPwd = false;
+  showNewPwd = false;
+  showConfirmPwd = false;
 
   // Logout
   loggingOut = false;
