@@ -159,8 +159,13 @@
           </div>
 
           <div class="upload-actions mt-24">
-            <button class="btn btn-primary" [disabled]="!selectedFile || processing" (click)="processFile()">
-              @if (processing) { <span class="spinner"></span> Processing... ({{ elapsedTime }}s / ~{{ etaTime }}s) } @else { ⚡ Process File }
+            <button class="btn btn-primary" [disabled]="!selectedFile || processing" (click)="processFile()" style="position: relative; overflow: hidden;">
+              @if (processing) {
+                <div class="progress-fill" [style.width.%]="progressPercent"></div>
+                <span class="btn-text" style="position: relative; z-index: 1;">⚡ {{ progressPercent }}% Processing...</span>
+              } @else {
+                <span class="btn-text">⚡ Process File</span>
+              }
             </button>
             <button class="btn btn-ghost" (click)="openHistory()">📋 View History</button>
           </div>

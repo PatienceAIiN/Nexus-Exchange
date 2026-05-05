@@ -45,9 +45,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   isDragging = false;
   processing = false;
   processResult: ProcessingProgress | null = null;
-  elapsedTime = 0;
-  etaTime = 0;
-  private processingTimer: any;
+  progressPercent = 0;
+  private progressRaf: any;
+  private progressStart = 0;
   showResultModal = false;
   showHistoryModal = false;
   history: ProcessedFile[] = [];
@@ -105,7 +105,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
-    if (this.processingTimer) clearInterval(this.processingTimer);
+    if (this.progressRaf) cancelAnimationFrame(this.progressRaf);
   }
 
   loadProfile(): void {
@@ -205,30 +205,51 @@ export class DashboardComponent implements OnInit, OnDestroy {
   processFile(): void {
     if (!this.selectedFile) return;
     this.processing = true;
-    this.elapsedTime = 0;
-    this.etaTime = Math.max(3, Math.ceil(this.selectedFile.size / 50000));
-
-    this.processingTimer = setInterval(() => {
-      this.elapsedTime++;
-      if (this.elapsedTime >= this.etaTime) {
-        this.etaTime = this.elapsedTime + 2;
-      }
-    }, 1000);
+    this.progressPercent = 0;
+    this.progressStart = performance.now();
+    this.animateProgress();
 
     this.proc.uploadFile(this.selectedFile).subscribe({
       next: (res) => {
-        clearInterval(this.processingTimer);
-        this.processing = false;
-        this.processResult = res;
-        this.showResultModal = true;
-        this.toastSvc.success('File processed successfully!');
+        this.finishProgress(() => {
+          this.processing = false;
+          this.processResult = res;
+          this.showResultModal = true;
+          this.toastSvc.success('File processed successfully!');
+        });
       },
       error: (e) => {
-        clearInterval(this.processingTimer);
+        if (this.progressRaf) cancelAnimationFrame(this.progressRaf);
         this.processing = false;
+        this.progressPercent = 0;
         this.toastSvc.error(e.error?.detail || 'Processing failed');
       }
     });
+  }
+
+  private animateProgress(): void {
+    const tick = () => {
+      const elapsed = (performance.now() - this.progressStart) / 1000;
+      // Asymptotic curve: fast start → slows down, max 88%
+      this.progressPercent = Math.min(88, Math.round(88 * (1 - Math.exp(-elapsed / 4))));
+      if (this.processing && this.progressPercent < 88) {
+        this.progressRaf = requestAnimationFrame(tick);
+      }
+    };
+    this.progressRaf = requestAnimationFrame(tick);
+  }
+
+  private finishProgress(onDone: () => void): void {
+    if (this.progressRaf) cancelAnimationFrame(this.progressRaf);
+    const step = () => {
+      this.progressPercent = Math.min(100, this.progressPercent + 3);
+      if (this.progressPercent < 100) {
+        requestAnimationFrame(step);
+      } else {
+        setTimeout(onDone, 300);
+      }
+    };
+    requestAnimationFrame(step);
   }
 
   downloadResult(): void {
