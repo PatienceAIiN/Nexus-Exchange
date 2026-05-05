@@ -9,7 +9,11 @@ logger = logging.getLogger(__name__)
 
 
 def send_email(to: str, subject: str, html_body: str) -> bool:
-    """Send email via GoDaddy SMTP. Returns True on success."""
+    """Send email via configured SMTP. Returns True on success."""
+    if not settings.SMTP_USER or not settings.SMTP_PASS:
+        logger.warning(f"SMTP credentials not set, skipping email to {to}")
+        return False
+
     try:
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
@@ -19,21 +23,25 @@ def send_email(to: str, subject: str, html_body: str) -> bool:
         part = MIMEText(html_body, "html")
         msg.attach(part)
 
+        timeout = 10  # 10 seconds timeout for SMTP operations
+        
         if settings.SMTP_SECURE:
+            logger.info(f"Connecting to SMTP via SSL: {settings.SMTP_HOST}:{settings.SMTP_PORT}")
             context = ssl.create_default_context()
-            with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, context=context) as server:
+            with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, context=context, timeout=timeout) as server:
                 server.login(settings.SMTP_USER, settings.SMTP_PASS)
                 server.sendmail(settings.SMTP_USER, to, msg.as_string())
         else:
-            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as server:
+            logger.info(f"Connecting to SMTP via STARTTLS: {settings.SMTP_HOST}:{settings.SMTP_PORT}")
+            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=timeout) as server:
                 server.starttls()
                 server.login(settings.SMTP_USER, settings.SMTP_PASS)
                 server.sendmail(settings.SMTP_USER, to, msg.as_string())
 
-        logger.info(f"Email sent to {to}: {subject}")
+        logger.info(f"Email successfully sent to {to}: {subject}")
         return True
     except Exception as e:
-        logger.error(f"Email send failed to {to}: {e}")
+        logger.error(f"CRITICAL: Email send failed to {to}. Error: {str(e)}", exc_info=True)
         return False
 
 
