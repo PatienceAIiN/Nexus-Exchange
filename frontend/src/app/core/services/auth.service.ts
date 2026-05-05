@@ -34,9 +34,16 @@ export class AuthService {
         if (res.role !== 'admin') {
           throw new Error('Not an admin account');
         }
+        // Set admin-specific storage
         localStorage.setItem(this.ADMIN_TOKEN_KEY, res.access_token);
         localStorage.setItem(this.ADMIN_USER_KEY, JSON.stringify({ username: res.username, role: res.role, id: res.user_id }));
         this.isAdminAuthenticated$.next(true);
+
+        // Also set standard user storage so admin can use client dashboard features
+        localStorage.setItem(this.TOKEN_KEY, res.access_token);
+        localStorage.setItem(this.USER_KEY, JSON.stringify({ username: res.username, role: res.role, id: res.user_id }));
+        this.isAuthenticated$.next(true);
+        this.currentUser$.next({ username: res.username, role: res.role, id: res.user_id });
       })
     );
   }
