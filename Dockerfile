@@ -4,7 +4,13 @@ WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm install
 COPY frontend/ .
-RUN npm run build -- --output-path=dist
+RUN npm run build
+
+# Normalizing output: Move files to a predictable 'dist-final' folder
+RUN mkdir -p dist-final && \
+    if [ -d "dist/frontend/browser" ]; then cp -r dist/frontend/browser/* dist-final/; \
+    elif [ -d "dist/browser" ]; then cp -r dist/browser/* dist-final/; \
+    else cp -r dist/* dist-final/; fi
 
 # --- Stage 2: Final Image ---
 FROM python:3.10-slim
@@ -22,11 +28,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY backend/ .
 
-# Create static directory and copy frontend build
+# Create static directory and copy normalized frontend build
 RUN mkdir -p static
-COPY --from=frontend-builder /app/frontend/dist/browser/ ./static/
-# Fallback for different Angular versions
-COPY --from=frontend-builder /app/frontend/dist/ ./static/ 2>/dev/null || true
+COPY --from=frontend-builder /app/frontend/dist-final/ ./static/
 
 # Set environment variables
 ENV APP_ENV=production
