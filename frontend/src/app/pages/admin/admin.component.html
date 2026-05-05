@@ -1,0 +1,177 @@
+<div class="page-container">
+  <header class="header">
+    <div class="header-left">
+      <h1 class="gradient-text">Nexus Exchange</h1>
+      <span class="badge beta">Admin</span>
+    </div>
+    <nav class="tab-nav">
+      <span class="tab-btn active">🛡 Admin Panel</span>
+    </nav>
+    <div class="header-right">
+      <button class="icon-btn" (click)="theme.toggle()">{{ isDark ? '☀️' : '🌙' }}</button>
+      <button class="btn btn-outline" style="margin-left:16px" (click)="logout()">🚪 Logout</button>
+    </div>
+  </header>
+
+  <main class="main-content">
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat-box card">
+        <div class="stat-num">{{ stats?.total_users ?? '—' }}</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-box card warn">
+        <div class="stat-num">{{ stats?.pending_signups ?? '—' }}</div>
+        <div class="stat-label">Pending Signups</div>
+      </div>
+      <div class="stat-box card">
+        <div class="stat-num">{{ stats?.total_rates ?? '—' }}</div>
+        <div class="stat-label">FBIL Rates</div>
+      </div>
+      <div class="stat-box card">
+        <div class="stat-num">{{ stats?.total_processed_files ?? '—' }}</div>
+        <div class="stat-label">Processed Files</div>
+      </div>
+    </div>
+
+    <!-- FILTER + HEADER -->
+    <div class="admin-header">
+      <div class="admin-title">
+        <h2>User Management</h2>
+        @if (pendingCount > 0) {
+          <span class="pending-badge">{{ pendingCount }} pending</span>
+        }
+      </div>
+      <div class="filter-group">
+        <select [(ngModel)]="filterStatus">
+          <option value="all">All Users</option>
+          <option value="pending">Pending</option>
+          <option value="approved">Approved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button class="btn btn-outline" (click)="loadUsers(); loadStats()">↻ Refresh</button>
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="loading-state"><div class="spinner-lg"></div></div>
+    } @else if (filteredUsers.length === 0) {
+      <div class="empty-state"><p>No users found</p></div>
+    } @else {
+      <div class="card table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Username</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>Active</th>
+              <th>Registered</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (user of filteredUsers; track user.id) {
+              <tr>
+                <td><strong>{{ user.username }}</strong></td>
+                <td class="text-secondary">{{ user.email || '—' }}</td>
+                <td><span class="badge {{ user.role }}">{{ user.role }}</span></td>
+                <td><span class="badge {{ user.signup_status }}">{{ user.signup_status }}</span></td>
+                <td>
+                  <span class="badge {{ user.is_active ? 'approved' : 'rejected' }}">
+                    {{ user.is_active ? 'Yes' : 'No' }}
+                  </span>
+                </td>
+                <td class="text-secondary">{{ user.created_at | slice:0:10 }}</td>
+                <td>
+                  <div class="action-btns">
+                    @if (user.signup_status === 'pending') {
+                      <button class="btn btn-primary" style="padding:5px 12px;font-size:12px"
+                        [disabled]="actionLoading[user.id]" (click)="approve(user.id)">
+                        @if (actionLoading[user.id]==='approving') { <span class="spinner"></span> } ✓
+                      </button>
+                      <button class="btn btn-danger" style="padding:5px 12px;font-size:12px"
+                        [disabled]="actionLoading[user.id]" (click)="reject(user.id)">
+                        @if (actionLoading[user.id]==='rejecting') { <span class="spinner"></span> } ✕
+                      </button>
+                    }
+                    <button class="btn btn-outline" style="padding:5px 12px;font-size:12px" (click)="openEdit(user)">
+                      ✏️
+                    </button>
+                    <button class="btn btn-danger" style="padding:5px 12px;font-size:12px"
+                      [disabled]="actionLoading[user.id]==='deleting'" (click)="confirmDelete(user.id)">
+                      @if (actionLoading[user.id]==='deleting') { <span class="spinner"></span> } 🗑
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </main>
+
+  <footer class="footer">
+    <span>A product of <a href="https://patienceai.in" target="_blank"><strong>Patience AI</strong></a></span>
+  </footer>
+</div>
+
+<!-- EDIT USER MODAL -->
+@if (editingUser) {
+  <div class="modal-backdrop" (click)="editingUser=null">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>✏️ Edit User — {{ editingUser.username }}</h2>
+      <div class="mt-24">
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="editEmail" placeholder="user@email.com" />
+        </div>
+        <div class="input-group">
+          <label>Role</label>
+          <select [(ngModel)]="editRole">
+            <option value="user">user</option>
+            <option value="admin">admin</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label>Status</label>
+          <select [(ngModel)]="editStatus">
+            <option value="pending">pending</option>
+            <option value="approved">approved</option>
+            <option value="rejected">rejected</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-actions mt-24">
+        <button class="btn btn-primary" [disabled]="actionLoading[editingUser.id]==='editing'" (click)="saveEdit()">
+          @if (actionLoading[editingUser.id]==='editing') { <span class="spinner"></span> } Save Changes
+        </button>
+        <button class="btn btn-ghost" (click)="editingUser=null">Cancel</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- DELETE CONFIRM MODAL -->
+@if (showDeleteConfirm !== null) {
+  <div class="modal-backdrop" (click)="showDeleteConfirm=null">
+    <div class="modal" style="max-width:380px;text-align:center" (click)="$event.stopPropagation()">
+      <h2>Delete User?</h2>
+      <p class="text-secondary mt-8">This action is irreversible. The user and all their data will be removed.</p>
+      <div class="modal-actions mt-24" style="justify-content:center">
+        <button class="btn btn-ghost" (click)="showDeleteConfirm=null">Cancel</button>
+        <button class="btn btn-danger" (click)="deleteUser(showDeleteConfirm!)">Delete</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- TOASTS -->
+<div class="toast-container">
+  @for (t of toasts; track t.id) {
+    <div class="toast {{ t.type }}" (click)="dismissToast(t.id)">{{ t.message }}</div>
+  }
+</div>

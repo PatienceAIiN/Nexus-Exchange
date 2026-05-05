@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+venv/
+.env
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+.vscode/
+
+# Backend static build (served by FastAPI)
+backend/static/
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+
+# IDE
+.idea/
+*.sublime-*

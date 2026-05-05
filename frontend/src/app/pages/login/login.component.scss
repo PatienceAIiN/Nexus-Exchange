@@ -1,0 +1,115 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-primary);
+}
+
+.blobs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.15;
+  animation: blob 8s ease-in-out infinite;
+
+  &.blob-1 {
+    width: 500px; height: 500px;
+    background: #00d4aa;
+    top: -100px; left: -100px;
+    animation-delay: 0s;
+  }
+  &.blob-2 {
+    width: 400px; height: 400px;
+    background: #6366f1;
+    bottom: -80px; right: -80px;
+    animation-delay: -3s;
+  }
+  &.blob-3 {
+    width: 300px; height: 300px;
+    background: #00d4aa;
+    top: 50%; left: 60%;
+    animation-delay: -5s;
+  }
+}
+
+.auth-card {
+  background: rgba(26, 32, 53, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 24px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+
+  :root[data-theme="light"] & {
+    background: rgba(255,255,255,0.85);
+    border-color: rgba(0,0,0,0.08);
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+  }
+}
+
+.subtitle {
+  color: var(--text-secondary);
+  font-size: 13px;
+  margin-bottom: 32px;
+}
+
+.error-msg {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: #ef4444;
+  font-size: 13px;
+  margin-bottom: 16px;
+  animation: slideIn 0.3s ease;
+}
+
+.auth-link {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+
+  a {
+    color: var(--accent-primary);
+    font-weight: 600;
+    text-decoration: none;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+@keyframes blob {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

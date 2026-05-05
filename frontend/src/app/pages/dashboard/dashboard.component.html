@@ -1,0 +1,377 @@
+<div class="page-container">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <h1 class="brand-name gradient-text">Nexus Exchange</h1>
+      <span class="badge beta">Beta</span>
+    </div>
+
+    <nav class="tab-nav">
+      <button class="tab-btn" [class.active]="activeTab==='rates'" (click)="activeTab='rates'">📈 Live Rates</button>
+      <button class="tab-btn" [class.active]="activeTab==='processing'" (click)="activeTab='processing'">📂 Manual Update</button>
+    </nav>
+
+    <div class="header-right">
+      <button class="icon-btn" (click)="theme.toggle()" title="Toggle theme">
+        {{ isDark ? '☀️' : '🌙' }}
+      </button>
+
+      <div class="avatar-wrapper" (click)="showProfile=!showProfile">
+        <img [src]="avatarUrl(profile?.avatar_seed || user?.username)" class="avatar" alt="avatar" />
+        @if (showProfile) {
+          <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:190" (click)="$event.stopPropagation(); showProfile=false"></div>
+          <div class="profile-dropdown" style="position:absolute;z-index:200" (click)="$event.stopPropagation()">
+            <div class="profile-user">
+              <strong>{{ user?.username }}</strong>
+              <span class="badge {{ user?.role }}">{{ user?.role }}</span>
+            </div>
+            <button (click)="showProfile=false; showChangePassword=true">🔑 Change Password</button>
+            <button class="danger" (click)="showProfile=false; showLogout=true">🚪 Logout</button>
+          </div>
+        }
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="main-content">
+
+    <!-- LIVE RATES TAB -->
+    @if (activeTab === 'rates') {
+      <div class="tab-content">
+        <div class="controls-row">
+          <div class="control-group">
+            <label>From</label>
+            <input type="date" [(ngModel)]="ratesFromDate" (change)="ratesPage=1; loadRates()" />
+          </div>
+          <div class="control-group">
+            <label>To</label>
+            <input type="date" [(ngModel)]="ratesToDate" (change)="ratesPage=1; loadRates()" />
+          </div>
+          <div class="control-group">
+            <label>Currency</label>
+            <select [(ngModel)]="ratesCurrency" (change)="ratesPage=1; loadRates()">
+              @for (c of currencies; track c) {
+                <option [value]="c">{{ c === 'all' ? 'All Currencies' : c }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="btn-group">
+            <button class="btn btn-outline" [class.spinning]="ratesRefreshing" (click)="refreshRates()" [disabled]="ratesRefreshing">
+              <span class="refresh-icon" [class.spin]="ratesRefreshing">↻</span>
+              @if (ratesRefreshing) { Refreshing... } @else { Refresh }
+            </button>
+
+            <div class="download-group">
+              <button class="btn btn-ghost" [disabled]="!!downloadingFormat">
+                @if (downloadingFormat) { <span class="spinner"></span> } @else { ⬇ } Download
+              </button>
+              <div class="download-menu">
+                <button (click)="downloadRates('csv')" [disabled]="downloadingFormat==='csv'">CSV</button>
+                <button (click)="downloadRates('xlsx')" [disabled]="downloadingFormat==='xlsx'">Excel</button>
+                <button (click)="downloadRates('pdf')" [disabled]="downloadingFormat==='pdf'">PDF</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        @if (ratesLoading) {
+          <div class="loading-state">
+            <div class="spinner-lg"></div>
+            <span>Loading rates...</span>
+          </div>
+        } @else if (rates.length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon">📊</div>
+            <p>No rates found for selected range</p>
+          </div>
+        } @else {
+          <div class="table-wrapper card">
+            <table>
+              <thead>
+                <tr>
+                  <th (click)="sort('date')">Date {{ sortCol==='date' ? (sortDir==='asc'?'↑':'↓') : '' }}</th>
+                  <th>Time</th>
+                  <th (click)="sort('currency_pair')">Currency Pair {{ sortCol==='currency_pair' ? (sortDir==='asc'?'↑':'↓') : '' }}</th>
+                  <th (click)="sort('rate')">Rate {{ sortCol==='rate' ? (sortDir==='asc'?'↑':'↓') : '' }}</th>
+                  <th>Comments</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (rate of rates; track rate.id) {
+                  <tr [class.flash-new]="flashedIds.has(rate.id)">
+                    <td>{{ rate.date }}</td>
+                    <td class="text-secondary">{{ rate.time || '—' }}</td>
+                    <td><span class="currency-chip">{{ rate.currency_pair }}</span></td>
+                    <td class="mono rate-val">{{ rate.rate }}</td>
+                    <td class="text-secondary">{{ rate.comments || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="pagination">
+            <button class="btn btn-ghost" (click)="prevPage()" [disabled]="ratesPage === 1">← Prev</button>
+            <span>Page {{ ratesPage }} of {{ ratesTotalPages }}</span>
+            <button class="btn btn-ghost" (click)="nextPage()" [disabled]="ratesPage === ratesTotalPages">Next →</button>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- MANUAL UPDATE TAB -->
+    @if (activeTab === 'processing') {
+      <div class="tab-content">
+
+        <!-- Upload Zone -->
+        <div class="upload-card card">
+          <h2>Upload Expense File</h2>
+          <p class="text-secondary mt-8">Upload your XLSX or CSV expense file to automatically fill in FBIL reference rates.</p>
+
+          <div class="drop-zone"
+            [class.dragging]="isDragging"
+            [class.has-file]="!!selectedFile"
+            (dragover)="onDragOver($event)"
+            (dragleave)="onDragLeave()"
+            (drop)="onDrop($event)"
+            (click)="!selectedFile && fileInput.click()">
+            <input #fileInput type="file" accept=".xlsx,.csv" (change)="onFileSelect($event)" style="display:none" />
+
+            @if (!selectedFile) {
+              <div class="drop-content">
+                <div class="drop-icon">📁</div>
+                <p>Drop your XLSX or CSV file here, or <strong>click to browse</strong></p>
+                <span class="text-secondary text-sm">Supported: .xlsx, .csv</span>
+              </div>
+            } @else {
+              <div class="file-info">
+                <div class="file-icon">📄</div>
+                <div>
+                  <strong>{{ selectedFile.name }}</strong>
+                  <span class="text-secondary text-sm">{{ formatBytes(selectedFile.size) }}</span>
+                </div>
+                <button class="remove-btn" (click)="$event.stopPropagation(); clearFile()">✕</button>
+              </div>
+            }
+          </div>
+
+          <div class="upload-actions mt-24">
+            <button class="btn btn-primary" [disabled]="!selectedFile || processing" (click)="processFile()">
+              @if (processing) { <span class="spinner"></span> Processing... ({{ elapsedTime }}s / ~{{ etaTime }}s) } @else { ⚡ Process File }
+            </button>
+            <button class="btn btn-ghost" (click)="openHistory()">📋 View History</button>
+          </div>
+        </div>
+      </div>
+    }
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <span>A product of <a href="https://patienceai.in" target="_blank" rel="noopener"><strong>Patience AI</strong></a></span>
+  </footer>
+</div>
+
+<!-- PROCESSING RESULT MODAL -->
+@if (showResultModal && processResult) {
+  <div class="modal-backdrop" (click)="showResultModal=false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>✅ Processing Complete</h2>
+      <div class="result-stats mt-24">
+        <div class="stat-card">
+          <div class="stat-num">{{ processResult.stats?.total_rows || 0 }}</div>
+          <div class="stat-label">Total Rows</div>
+        </div>
+        <div class="stat-card success">
+          <div class="stat-num">{{ processResult.stats?.matched_rows || 0 }}</div>
+          <div class="stat-label">Matched</div>
+        </div>
+        <div class="stat-card warn">
+          <div class="stat-num">{{ processResult.stats?.unmatched_rows || 0 }}</div>
+          <div class="stat-label">Unmatched</div>
+        </div>
+      </div>
+
+      @if (processResult.stats?.unmatched_dates?.length > 0) {
+        <div class="unmatched-section mt-16">
+          <h4>Unmatched Dates:</h4>
+          <div class="unmatched-list">
+            @for (d of processResult.stats.unmatched_dates; track d) {
+              <span class="unmatched-chip">{{ d }}</span>
+            }
+          </div>
+        </div>
+      }
+
+      <div class="modal-actions mt-24">
+        <button class="btn btn-primary" (click)="downloadResult()">⬇ Download Processed File</button>
+        <button class="btn btn-ghost" (click)="showResultModal=false; clearFile()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- HISTORY MODAL -->
+@if (showHistoryModal) {
+  <div class="modal-backdrop" (click)="showHistoryModal=false">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 style="margin:0">📋 Processed Files History</h2>
+        @if (selectedFileIds.size > 0) {
+          <button class="btn btn-danger" style="padding:6px 12px;font-size:13px" (click)="confirmBulkDelete()">
+            🗑 Delete Selected ({{ selectedFileIds.size }})
+          </button>
+        }
+      </div>
+      
+      @if (historyLoading) {
+        <div class="loading-state mt-24"><div class="spinner-lg"></div></div>
+      } @else if (history.length === 0) {
+        <div class="empty-state mt-24"><p>No processed files yet</p></div>
+      } @else {
+        <div class="table-wrapper mt-16" style="max-height:400px;overflow-y:auto">
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px"><input type="checkbox" (change)="toggleAllFiles($event)" [checked]="isAllFilesSelected()" /></th>
+                <th>Filename</th>
+                <th>Date</th>
+                <th>Total</th>
+                <th>Matched</th>
+                <th>Status</th>
+                <th>Download</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (f of history; track f.id) {
+                <tr>
+                  <td><input type="checkbox" [checked]="selectedFileIds.has(f.id)" (change)="toggleFileSelection(f.id, $event)" /></td>
+                  <td>{{ f.original_filename }}</td>
+                  <td class="text-secondary">{{ f.created_at | slice:0:10 }}</td>
+                  <td>{{ f.total_rows }}</td>
+                  <td><span class="success-text">{{ f.matched_rows }}</span></td>
+                  <td><span class="badge {{ f.status === 'completed' ? 'approved' : 'pending' }}">{{ f.status }}</span></td>
+                  <td>
+                    <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" (click)="downloadHistoryFile(f)" [disabled]="downloadingFileId===f.id">
+                      @if (downloadingFileId===f.id) { <span class="spinner"></span> } @else { ⬇ }
+                    </button>
+                  </td>
+                  <td>
+                    <button class="btn btn-danger btn-ghost" style="padding:6px 12px;font-size:12px;color:var(--danger)" (click)="confirmDeleteFile(f)">
+                      🗑
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+      <div class="modal-actions mt-24">
+        <button class="btn btn-ghost" (click)="showHistoryModal=false">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- CHANGE PASSWORD MODAL -->
+@if (showChangePassword) {
+  <div class="modal-backdrop" (click)="showChangePassword=false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>🔑 Change Password</h2>
+      <div class="mt-24">
+        <div class="input-group">
+          <label>Current Password</label>
+          <input type="password" [(ngModel)]="oldPwd" placeholder="Current password" />
+        </div>
+        <div class="input-group">
+          <label>New Password</label>
+          <input type="password" [(ngModel)]="newPwd" placeholder="New password" />
+          @if (newPwd) {
+            <div class="pwd-strength mt-8">
+              <div class="pwd-strength-bar">
+                @for (i of [1,2,3,4,5]; track i) {
+                  <div class="pwd-seg" [class.filled]="pwdStrength >= i" [class.s1]="pwdStrength<=1" [class.s2]="pwdStrength<=2" [class.s3]="pwdStrength<=3" [class.s4]="pwdStrength<=4" [class.s5]="pwdStrength===5"></div>
+                }
+              </div>
+              <span class="text-sm text-secondary">{{ pwdStrengthLabel }}</span>
+            </div>
+          }
+        </div>
+        <div class="input-group">
+          <label>Confirm New Password</label>
+          <input type="password" [(ngModel)]="confirmPwd" placeholder="Confirm new password" />
+        </div>
+        @if (pwdError) { <div class="error-msg">{{ pwdError }}</div> }
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" [disabled]="changingPassword" (click)="submitChangePassword()">
+          @if (changingPassword) { <span class="spinner"></span> } Change Password
+        </button>
+        <button class="btn btn-ghost" (click)="showChangePassword=false">Cancel</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- LOGOUT MODAL -->
+@if (showLogout) {
+  <div class="modal-backdrop" (click)="showLogout=false">
+    <div class="modal" style="max-width:380px;text-align:center" (click)="$event.stopPropagation()">
+      <h2>Log Out?</h2>
+      <p class="text-secondary mt-8">Are you sure you want to log out?</p>
+      <div class="modal-actions mt-24" style="justify-content:center">
+        <button class="btn btn-ghost" (click)="showLogout=false">Cancel</button>
+        <button class="btn btn-danger" [disabled]="loggingOut" (click)="confirmLogout()">
+          @if (loggingOut) { <span class="spinner"></span> } Logout
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- DELETE CONFIRMATION MODAL -->
+@if (fileToDelete) {
+  <div class="modal-backdrop" (click)="fileToDelete=null">
+    <div class="modal" style="max-width:380px;text-align:center" (click)="$event.stopPropagation()">
+      <h2>Delete File?</h2>
+      <p class="text-secondary mt-8">Are you sure you want to delete "{{ fileToDelete.original_filename }}"? This action cannot be undone.</p>
+      <div class="modal-actions mt-24" style="justify-content:center">
+        <button class="btn btn-ghost" (click)="fileToDelete=null">Cancel</button>
+        <button class="btn btn-danger" [disabled]="deletingFile" (click)="deleteFile()">
+          @if (deletingFile) { <span class="spinner"></span> } Delete
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- BULK DELETE CONFIRMATION MODAL -->
+@if (showBulkDeleteConfirm) {
+  <div class="modal-backdrop" (click)="showBulkDeleteConfirm=false">
+    <div class="modal" style="max-width:380px;text-align:center" (click)="$event.stopPropagation()">
+      <h2>Delete {{ selectedFileIds.size }} Files?</h2>
+      <p class="text-secondary mt-8">Are you sure you want to delete all selected files? This action cannot be undone.</p>
+      <div class="modal-actions mt-24" style="justify-content:center">
+        <button class="btn btn-ghost" (click)="showBulkDeleteConfirm=false">Cancel</button>
+        <button class="btn btn-danger" [disabled]="deletingBulk" (click)="deleteBulkFiles()">
+          @if (deletingBulk) { <span class="spinner"></span> } Delete All
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- TOASTS -->
+<div class="toast-container">
+  @for (toast of toasts; track toast.id) {
+    <div class="toast {{ toast.type }}" (click)="dismissToast(toast.id)">
+      {{ toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : toast.type === 'warning' ? '⚠' : 'ℹ' }}
+      {{ toast.message }}
+    </div>
+  }
+</div>
