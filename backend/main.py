@@ -165,13 +165,16 @@ app.include_router(profile_routes.router)
 @app.middleware("http")
 async def domain_redirect_middleware(request: Request, call_next):
     host = request.headers.get("host", "")
-    # Redirect if request comes from onrender.com and a custom SITE_URL is set (and it's not localhost)
+    # Only redirect if on a *.onrender.com domain and we have a custom domain configured
     if "onrender.com" in host and "patienceai.in" in settings.SITE_URL:
-        # Extract domain from SITE_URL (e.g., https://nexusexchange.patienceai.in -> nexusexchange.patienceai.in)
+        # Extract the target host from SITE_URL
         target_host = settings.SITE_URL.split("://")[-1].rstrip("/")
         if host != target_host:
-            target_url = str(request.url).replace(host, target_host)
+            # Reconstruct URL with target host
+            target_url = str(request.url.replace(netloc=target_host, scheme="https"))
+            logger.info(f"Redirecting {host} to {target_host}")
             return RedirectResponse(url=target_url, status_code=301)
+    
     return await call_next(request)
 
 @app.websocket("/ws/rates")
@@ -183,45 +186,39 @@ async def websocket_rates(websocket: WebSocket):
     except WebSocketDisconnect:
         ws_manager.disconnect(websocket)
 
-# Serve Angular static files if dist exists
-static_path = settings.FRONTEND_DIST_PATH
-# Fallback to ./static if configured path doesn't exist
-if not os.path.exists(static_path):
-    static_path = "./static"
-
-if os.path.exists(static_path) and any(os.path.isfile(os.path.join(static_path, f)) for f in ["index.html", "browser/index.html"]):
-    # Check if we need to go one level deeper (for local dev with /browser/ subfolder)
-    if not os.path.isfile(os.path.join(static_path, "index.html")) and os.path.isdir(os.path.join(static_path, "browser")):
+# SPA / Static Serving Logic
+def setup_frontend(app: FastAPI):
+    # Detect static path
+    static_path = os.getenv("FRONTEND_DIST_PATH", "./static")
+    if os.path.isdir(os.path.join(static_path, "browser")):
         static_path = os.path.join(static_path, "browser")
     
-    logger.info(f"Serving frontend from: {static_path}")
-    
-    # Mount static assets
     assets_path = os.path.join(static_path, "assets")
-    if os.path.exists(assets_path):
-        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
     
-    # Mount full static dir for JS/CSS chunks
-    app.mount("/static-files", StaticFiles(directory=static_path), name="static-files")
+    if os.path.isdir(assets_path):
+        app.mount("/assets", StaticFiles(directory=assets_path), name="assets")
+        logger.info(f"Mounted assets from {assets_path}")
 
     @app.get("/{full_path:path}", include_in_schema=False)
     async def serve_angular(full_path: str):
-        # Try serving the file directly
+        # Prevent recursion for API or assets
+        if full_path.startswith("api/") or full_path.startswith("assets/"):
+            return JSONResponse(status_code=404, content={"detail": "Not Found"})
+
+        # Try to serve the file directly
         file_path = os.path.join(static_path, full_path)
         if full_path and os.path.isfile(file_path):
             return FileResponse(file_path)
         
-        # Fallback to index.html for SPA routing
+        # Fallback to index.html for all other paths (SPA routing)
         index = os.path.join(static_path, "index.html")
         if os.path.exists(index):
             return FileResponse(index)
         
-        return JSONResponse({"message": "Nexus Exchange API is running. Frontend index.html not found."})
-else:
-    logger.warning(f"Frontend static path not found or empty: {static_path}")
-    @app.get("/", include_in_schema=False)
-    async def root():
-        return {"message": "Nexus Exchange API is running", "docs": "/docs"}
+        return JSONResponse(status_code=404, content={"detail": "Frontend build not found"})
+
+# Initialize frontend serving
+setup_frontend(app)
 
 if __name__ == "__main__":
     import uvicorn
