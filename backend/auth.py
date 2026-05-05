@@ -14,11 +14,19 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 security = HTTPBearer()
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    if not plain:
+        return False
+    # Bcrypt has a strict 72-byte limit.
+    safe_pwd = plain.encode('utf-8')[:72].decode('utf-8', 'ignore')
+    return pwd_context.verify(safe_pwd, hashed)
 
 def get_password_hash(password: str) -> str:
-    # Bcrypt has a 72-byte limit; truncate to ensure compatibility
-    safe_pwd = password[:72] if password else ""
+    if not password:
+        return pwd_context.hash("")
+    # Bcrypt has a strict 72-byte limit. 
+    # Truncate at the byte level to handle multi-byte characters safely, 
+    # then decode back to string for passlib.
+    safe_pwd = password.encode('utf-8')[:72].decode('utf-8', 'ignore')
     return pwd_context.hash(safe_pwd)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

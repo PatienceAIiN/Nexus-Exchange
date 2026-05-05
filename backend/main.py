@@ -76,37 +76,41 @@ async def lifespan(app: FastAPI):
 
     # Seed admin user
     async with AsyncSessionLocal() as db:
-        result = await db.execute(select(User).where(User.username == settings.ADMIN_USERNAME))
-        existing_admin = result.scalar_one_or_none()
-        if not existing_admin:
-            admin = User(
-                username=settings.ADMIN_USERNAME,
-                password_hash=get_password_hash(settings.ADMIN_PASSWORD),
-                role=UserRole.ADMIN,
-                signup_status=SignupStatus.APPROVED,
-                avatar_seed="admin",
-            )
-            db.add(admin)
-            await db.commit()
-            logger.info(f"Admin user '{settings.ADMIN_USERNAME}' created")
-        else:
-            # Ensure admin always has correct role, status and password
-            changed = False
-            if existing_admin.role != UserRole.ADMIN:
-                existing_admin.role = UserRole.ADMIN
-                changed = True
-            if existing_admin.signup_status != SignupStatus.APPROVED:
-                existing_admin.signup_status = SignupStatus.APPROVED
-                changed = True
-            if not existing_admin.is_active:
-                existing_admin.is_active = True
-                changed = True
-            # Always reset password to env value on startup
-            existing_admin.password_hash = get_password_hash(settings.ADMIN_PASSWORD)
-            changed = True
-            if changed:
+        # Sync Admin
+        try:
+            result = await db.execute(select(User).where(User.username == settings.ADMIN_USERNAME))
+            existing_admin = result.scalar_one_or_none()
+            if not existing_admin:
+                admin = User(
+                    username=settings.ADMIN_USERNAME,
+                    password_hash=get_password_hash(settings.ADMIN_PASSWORD),
+                    role=UserRole.ADMIN,
+                    signup_status=SignupStatus.APPROVED,
+                    avatar_seed="admin",
+                )
+                db.add(admin)
                 await db.commit()
-                logger.info(f"Admin user '{settings.ADMIN_USERNAME}' credentials & role synced")
+                logger.info(f"Admin user '{settings.ADMIN_USERNAME}' created")
+            else:
+                # Ensure admin always has correct role, status and password
+                changed = False
+                if existing_admin.role != UserRole.ADMIN:
+                    existing_admin.role = UserRole.ADMIN
+                    changed = True
+                if existing_admin.signup_status != SignupStatus.APPROVED:
+                    existing_admin.signup_status = SignupStatus.APPROVED
+                    changed = True
+                if not existing_admin.is_active:
+                    existing_admin.is_active = True
+                    changed = True
+                # Always reset password to env value on startup
+                existing_admin.password_hash = get_password_hash(settings.ADMIN_PASSWORD)
+                changed = True
+                if changed:
+                    await db.commit()
+                    logger.info(f"Admin user '{settings.ADMIN_USERNAME}' credentials & role synced")
+        except Exception as e:
+            logger.error(f"Failed to sync admin user: {e}")
 
         # Check if we need historical data backfill
         count_result = await db.execute(select(FBILRate).limit(1))
