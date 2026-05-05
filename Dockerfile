@@ -6,11 +6,16 @@ RUN npm install
 COPY frontend/ .
 RUN npm run build
 
-# Normalizing output: Move files to a predictable 'dist-final' folder
+# Robust normalization: Find the directory containing index.html and move its contents to dist-final
 RUN mkdir -p dist-final && \
-    if [ -d "dist/frontend/browser" ]; then cp -r dist/frontend/browser/* dist-final/; \
-    elif [ -d "dist/browser" ]; then cp -r dist/browser/* dist-final/; \
-    else cp -r dist/* dist-final/; fi
+    INDEX_DIR=$(find dist -name "index.html" -exec dirname {} \;) && \
+    if [ -n "$INDEX_DIR" ]; then \
+        echo "Found index.html in $INDEX_DIR, copying contents..."; \
+        cp -r $INDEX_DIR/* dist-final/; \
+    else \
+        echo "Warning: index.html not found, falling back to dist/"; \
+        cp -r dist/* dist-final/ 2>/dev/null || true; \
+    fi
 
 # --- Stage 2: Final Image ---
 FROM python:3.10-slim
