@@ -15,10 +15,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(authReq).pipe(
     catchError(err => {
       if (err.status === 401) {
-        if (isAdminReq) {
-          auth.adminLogout();
-        } else {
-          auth.logout();
+        const isAuthReq = req.url.includes('/api/auth/');
+        if (!isAuthReq) {
+          if (isAdminReq) {
+            auth.adminLogout();
+          } else {
+            auth.logout();
+          }
         }
       }
       return throwError(() => err);
