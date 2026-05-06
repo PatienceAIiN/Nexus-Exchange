@@ -35,12 +35,15 @@ async def signup(data: UserCreate, background_tasks: BackgroundTasks, db: AsyncS
     await db.commit()
 
     # Notify admin about new signup
-    if settings.ADMIN_EMAIL:
+    admin_notification_email = settings.ADMIN_EMAIL or settings.CONTACT_TO_EMAIL
+    if admin_notification_email:
         background_tasks.add_task(
             _send_admin_notification,
             data.username,
-            settings.ADMIN_EMAIL,
+            admin_notification_email,
         )
+    else:
+        logger.warning("No ADMIN_EMAIL/CONTACT_TO_EMAIL configured; signup notification email skipped")
 
     return {"message": "Signup request submitted. Awaiting admin approval."}
 

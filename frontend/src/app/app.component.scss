@@ -1,0 +1,41 @@
+.support-fab {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 1200;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  background: var(--accent-gradient);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.support-modal {
+  max-width: 560px;
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.muted { color: var(--text-secondary); margin-bottom: 14px; }
+
+textarea {
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-primary);
+}
+
+.support-footer { margin-top: 14px; color: var(--accent-primary); font-weight: 600; }

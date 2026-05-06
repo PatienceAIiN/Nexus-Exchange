@@ -7,6 +7,7 @@ import { ToastService } from '../../core/services/toast.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Toast } from '../../core/models/interfaces';
+import { SupportModalService } from '../../core/services/support-modal.service';
 
 @Component({
   selector: 'app-admin',
@@ -29,13 +30,17 @@ export class AdminComponent implements OnInit {
   editEmail = '';
   editRole = '';
   editStatus = '';
+  showProfile = false;
 
   constructor(
     private http: HttpClient,
     private toast: ToastService,
     public theme: ThemeService,
-    private auth: AuthService
+    private auth: AuthService,
+    private supportModal: SupportModalService,
   ) {}
+
+  openSupport(): void { this.showProfile = false; this.supportModal.open(); }
 
   ngOnInit(): void {
     this.isDark = this.theme.theme$.value === 'dark';

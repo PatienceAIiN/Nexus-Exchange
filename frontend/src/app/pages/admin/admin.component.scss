@@ -132,3 +132,30 @@
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.avatar-wrapper { position: relative; }
+.profile-dropdown {
+  min-width: 170px;
+  right: 0;
+  top: 42px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  button {
+    border: none;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    text-align: left;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .danger { color: var(--danger); }
+}

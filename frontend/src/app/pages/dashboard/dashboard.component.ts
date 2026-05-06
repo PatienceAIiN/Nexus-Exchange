@@ -11,6 +11,7 @@ import { WebSocketService } from '../../core/services/websocket.service';
 import { FBILRate, ProcessedFile, ProcessingProgress, Toast } from '../../core/models/interfaces';
 import { Subscription } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { SupportModalService } from '../../core/services/support-modal.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -89,7 +90,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private proc: ProcessingService,
     private ws: WebSocketService,
     private http: HttpClient,
+    private supportModal: SupportModalService,
   ) {}
+
+  openSupport(): void { this.showProfile = false; this.supportModal.open(); }
 
   ngOnInit(): void {
     this.user = this.auth.currentUser$.value;

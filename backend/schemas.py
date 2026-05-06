@@ -65,3 +65,10 @@ class ProcessedFileResponse(BaseModel):
 
 class AvatarUpdate(BaseModel):
     avatar_seed: str
+
+
+class SupportRequestCreate(BaseModel):
+    username: Optional[str] = None
+    email: Optional[str] = None
+    subject: str
+    message: str
