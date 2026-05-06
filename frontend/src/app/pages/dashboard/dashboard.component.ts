@@ -104,6 +104,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.loadRates();
     this.loadProfile();
     this.connectWS();
+    this.autoRefreshRatesOnLogin();
   }
 
   ngOnDestroy(): void {
@@ -111,6 +112,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (this.progressRaf) cancelAnimationFrame(this.progressRaf);
   }
 
+
+
+  private autoRefreshRatesOnLogin(): void {
+    // Trigger a background refresh so newly scraped FBIL data is persisted and shown instantly after login
+    this.rates$.refresh().subscribe({
+      next: () => this.loadRates(),
+      error: () => {
+        // Keep UX smooth: initial data is still shown from loadRates() even if refresh fails
+      }
+    });
+  }
   loadProfile(): void {
     this.http.get<any>('/api/profile').subscribe({
       next: p => this.profile = p,
