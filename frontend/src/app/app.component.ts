@@ -1,9 +1,12 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './core/services/auth.service';
+import { SupportModalService } from './core/services/support-modal.service';
+import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -15,14 +18,23 @@ import { AuthService } from './core/services/auth.service';
 export class AppComponent {
   title = 'frontend';
   supportOpen = false;
+  showFloatingSupport = false;
   loading = false;
   success = '';
   error = '';
   form = { username: '', email: '', subject: '', message: '' };
 
-  constructor(private http: HttpClient, private authService: AuthService) {
+  constructor(private http: HttpClient, private authService: AuthService, private supportModal: SupportModalService, private router: Router) {
     const user = this.authService.currentUser$.value;
     if (user?.username) this.form.username = user.username;
+    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => this.updateFloatingSupportVisibility());
+    this.updateFloatingSupportVisibility();
+    this.supportModal.openSupport$.subscribe(() => this.openSupport());
+  }
+
+  private updateFloatingSupportVisibility() {
+    const route = this.router.url;
+    this.showFloatingSupport = route === '/login' || route === '/signup' || route === '/admin/login';
   }
 
   openSupport() { this.supportOpen = true; }

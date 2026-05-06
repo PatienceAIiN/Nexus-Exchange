@@ -9,7 +9,16 @@
     </nav>
     <div class="header-right">
       <button class="icon-btn" (click)="theme.toggle()">{{ isDark ? '☀️' : '🌙' }}</button>
-      <button class="btn btn-outline" style="margin-left:16px" (click)="logout()">🚪 Logout</button>
+      <div class="avatar-wrapper" (click)="showProfile=!showProfile">
+        <button class="icon-btn">👤</button>
+        @if (showProfile) {
+          <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:190" (click)="$event.stopPropagation(); showProfile=false"></div>
+          <div class="profile-dropdown" style="position:absolute;z-index:200" (click)="$event.stopPropagation()">
+            <button (click)="openSupport()">🛟 Support</button>
+            <button class="danger" (click)="showProfile=false; logout()">🚪 Logout</button>
+          </div>
+        }
+      </div>
     </div>
   </header>
 

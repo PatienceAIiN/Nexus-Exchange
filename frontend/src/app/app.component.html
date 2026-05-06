@@ -1,4 +1,6 @@
-<button class="support-fab" (click)="openSupport()">Support</button>
+@if (showFloatingSupport) {
+  <button class="support-fab" (click)="openSupport()">Support</button>
+}
 
 @if (supportOpen) {
   <div class="modal-backdrop" (click)="closeSupport()">

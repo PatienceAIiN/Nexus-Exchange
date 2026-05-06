@@ -26,6 +26,7 @@
               <strong>{{ user?.username }}</strong>
               <span class="badge {{ user?.role }}">{{ user?.role }}</span>
             </div>
+            <button (click)="openSupport()">🛟 Support</button>
             <button (click)="showProfile=false; showChangePassword=true">🔑 Change Password</button>
             <button class="danger" (click)="showProfile=false; showLogout=true">🚪 Logout</button>
           </div>
