@@ -33,6 +33,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ratesRefreshing = false;
   ratesFromDate = '';
   ratesToDate = '';
+  readonly todayDate = new Date().toISOString().split('T')[0];
   ratesCurrency = 'all';
   downloadingFormat = '';
   sortCol = 'date';
@@ -96,9 +97,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.subs.add(this.theme.theme$.subscribe(t => this.isDark = t === 'dark'));
     this.subs.add(this.toastSvc.toasts$.subscribe(t => this.toasts = t));
 
-    const today = new Date();
+    const today = new Date(this.todayDate);
     const month = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-    this.ratesToDate = today.toISOString().split('T')[0];
+    this.ratesToDate = this.todayDate;
     this.ratesFromDate = month.toISOString().split('T')[0];
 
     this.loadRates();
@@ -156,6 +157,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
       },
       error: () => { this.ratesLoading = false; this.toastSvc.error('Failed to load rates'); }
     });
+  }
+
+  onDateFilterChange(): void {
+    if (!this.validateAndNormalizeDateRange()) return;
+    this.ratesPage = 1;
+    this.loadRates();
+  }
+
+  private validateAndNormalizeDateRange(): boolean {
+    if (!this.ratesFromDate || !this.ratesToDate) return true;
+
+    if (this.ratesFromDate > this.todayDate) {
+      this.ratesFromDate = this.todayDate;
+      this.toastSvc.error('Start date cannot be in the future.');
+      return false;
+    }
+
+    if (this.ratesToDate > this.todayDate) {
+      this.ratesToDate = this.todayDate;
+      this.toastSvc.error('End date cannot be in the future.');
+      return false;
+    }
+
+    if (this.ratesFromDate > this.ratesToDate) {
+      this.toastSvc.error('Invalid range: start date must be before or equal to end date.');
+      return false;
+    }
+
+    return true;
   }
 
   refreshRates(): void {

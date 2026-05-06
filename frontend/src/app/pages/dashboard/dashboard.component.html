@@ -43,11 +43,11 @@
         <div class="controls-row">
           <div class="control-group">
             <label>From</label>
-            <input type="date" [(ngModel)]="ratesFromDate" (change)="ratesPage=1; loadRates()" />
+            <input type="date" [(ngModel)]="ratesFromDate" [max]="todayDate" (change)="onDateFilterChange()" />
           </div>
           <div class="control-group">
             <label>To</label>
-            <input type="date" [(ngModel)]="ratesToDate" (change)="ratesPage=1; loadRates()" />
+            <input type="date" [(ngModel)]="ratesToDate" [max]="todayDate" (change)="onDateFilterChange()" />
           </div>
           <div class="control-group">
             <label>Currency</label>
