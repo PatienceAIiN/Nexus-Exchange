@@ -12,6 +12,9 @@ import pandas as pd
 from config import settings
 
 router = APIRouter(prefix="/api/rates", tags=["rates"])
+BRAND_TITLE = "Nexus Exchange"
+BRAND_COMPANY = "A product of Patience AI"
+BRAND_LINK = "https://patienceai.in"
 
 # WebSocket manager (shared with main.py)
 ws_manager = None
@@ -132,6 +135,7 @@ async def download_rates(
         output = io.StringIO()
         output.write("Financial Benchmarks India Pvt Ltd\nReference Rates\n")
         df.to_csv(output, index=False)
+        output.write(f"\n{BRAND_TITLE}\n{BRAND_COMPANY}\n{BRAND_LINK}\n")
         content = output.getvalue().encode()
         media_type = "text/csv"
         ext = "csv"
@@ -142,6 +146,13 @@ async def download_rates(
             ws = writer.sheets["FBIL Rates"]
             for col in ws.columns:
                 ws.column_dimensions[col[0].column_letter].width = 20
+
+            footer_row = len(df) + 4
+            ws.cell(row=footer_row, column=1, value=BRAND_TITLE)
+            ws.cell(row=footer_row, column=2, value=BRAND_COMPANY)
+            link_cell = ws.cell(row=footer_row + 1, column=1, value=BRAND_LINK)
+            link_cell.hyperlink = BRAND_LINK
+            link_cell.style = "Hyperlink"
         content = output.getvalue()
         media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         ext = "xlsx"
@@ -172,6 +183,10 @@ async def download_rates(
             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f8fafc")]),
         ]))
         elements.append(t)
+        elements.append(Spacer(1, 20))
+        elements.append(Paragraph(f"<b>{BRAND_TITLE}</b>", styles["Normal"]))
+        elements.append(Paragraph(BRAND_COMPANY, styles["Normal"]))
+        elements.append(Paragraph(f'<a href="{BRAND_LINK}">{BRAND_LINK}</a>', styles["Normal"]))
         doc.build(elements)
         content = output.getvalue()
         media_type = "application/pdf"

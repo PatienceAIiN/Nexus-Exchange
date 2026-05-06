@@ -1,1 +1,35 @@
+<button class="support-fab" (click)="openSupport()">Support</button>
+
+@if (supportOpen) {
+  <div class="modal-backdrop" (click)="closeSupport()">
+    <div class="modal support-modal" (click)="$event.stopPropagation()">
+      <button class="close-btn" (click)="closeSupport()">✕</button>
+      <h2>Support Contact</h2>
+      <p class="muted">Need help? Fill this form and our team will get back to you.</p>
+      <form (ngSubmit)="submitSupport()">
+        <div class="input-group">
+          <label>Username</label>
+          <input type="text" [(ngModel)]="form.username" name="username" placeholder="Your username (optional)" />
+        </div>
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="form.email" name="email" placeholder="Your email (optional)" />
+        </div>
+        <div class="input-group">
+          <label>Subject</label>
+          <input type="text" [(ngModel)]="form.subject" name="subject" required placeholder="Issue subject" />
+        </div>
+        <div class="input-group">
+          <label>Message</label>
+          <textarea [(ngModel)]="form.message" name="message" required rows="4" placeholder="Describe your issue"></textarea>
+        </div>
+        @if (success) { <div class="success-msg">{{ success }}</div> }
+        @if (error) { <div class="error-msg">{{ error }}</div> }
+        <button class="btn btn-primary" type="submit" [disabled]="loading">Submit</button>
+      </form>
+      <div class="support-footer">support&#64;patienceai.in</div>
+    </div>
+  </div>
+}
+
 <router-outlet />
