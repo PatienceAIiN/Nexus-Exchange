@@ -464,3 +464,44 @@
     span { width: 100%; text-align: center; order: -1; }
   }
 }
+
+
+/* Refined responsive scrolling without affecting desktop */
+@media (max-width: 768px) {
+  .tab-nav {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    width: 100%;
+    justify-content: flex-start !important;
+    padding-bottom: 4px;
+
+    .tab-btn {
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+  }
+
+  .controls-row .btn-group {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    padding-bottom: 4px;
+
+    .btn, .download-group {
+      flex: 0 0 auto;
+      white-space: nowrap;
+    }
+  }
+
+  .rates-table-scroll,
+  .history-table-scroll {
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    max-height: min(58vh, 460px);
+  }
+
+  .rates-table-scroll table,
+  .history-table-scroll table {
+    min-width: 720px;
+  }
+}
