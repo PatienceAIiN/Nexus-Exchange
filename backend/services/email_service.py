@@ -126,3 +126,20 @@ def send_role_update_email(username: str, to_email: str, new_role: str) -> bool:
     </div>
     """
     return send_email(to_email, subject, html)
+
+
+def send_support_notification_to_admin(username: str, user_email: str, subject_text: str, message: str, admin_email: str) -> bool:
+    subject = f"Support Request Received: {subject_text}"
+    html = f"""
+    <div style=\"font-family:Arial,sans-serif;max-width:560px;margin:0 auto;background:#0a0e17;color:#f0f4f8;padding:24px;border-radius:12px;\">
+      <h2 style=\"color:#00d4aa;\">New Support Request</h2>
+      <p><strong>User:</strong> {username or 'Anonymous'}</p>
+      <p><strong>Email:</strong> {user_email or 'Not provided'}</p>
+      <p><strong>Subject:</strong> {subject_text}</p>
+      <p><strong>Message:</strong></p>
+      <div style=\"background:#1a2035;padding:12px;border-radius:8px;white-space:pre-wrap;\">{message}</div>
+      <hr style=\"border:none;border-top:1px solid #1e2a45;margin:16px 0;\">
+      <p style=\"font-size:13px;\">support@patienceai.in</p>
+    </div>
+    """
+    return send_email(admin_email, subject, html)

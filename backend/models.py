@@ -49,3 +49,13 @@ class ProcessedFile(Base):
     status = Column(String(50), default="processing")
     processing_log = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class SupportRequest(Base):
+    __tablename__ = "support_requests"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    username = Column(String(100), nullable=True, index=True)
+    email = Column(String(255), nullable=True, index=True)
+    subject = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
