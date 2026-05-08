@@ -33,6 +33,13 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     FRONTEND_DIST_PATH: str = "./static"
 
+    CORS_ALLOWED_ORIGINS: str = "http://localhost:4200,http://localhost:3000"
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+    RATE_LIMIT_MAX_REQUESTS: int = 120
+    WS_MAX_CONNECTIONS_PER_IP: int = 5
+    WS_MAX_CONNECTIONS_TOTAL: int = 500
+    MAX_UPLOAD_SIZE_MB: int = 15
+
     class Config:
         env_file = ".env"
 

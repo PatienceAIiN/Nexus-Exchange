@@ -5,6 +5,7 @@ from sqlalchemy import select, and_
 from database import get_db
 from models import FBILRate, ProcessedFile, User
 from auth import get_current_user
+from config import settings
 from services.file_processor import process_expense_file
 from services import r2_storage
 from sse_starlette.sse import EventSourceResponse
@@ -31,6 +32,9 @@ async def upload_file(
         raise HTTPException(status_code=400, detail="Only .xlsx and .csv files are accepted")
 
     file_bytes = await file.read()
+    max_size_bytes = settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+    if len(file_bytes) > max_size_bytes:
+        raise HTTPException(status_code=413, detail=f"File too large. Max {settings.MAX_UPLOAD_SIZE_MB}MB")
 
     # Fetch all rates upfront for matching
     result = await db.execute(select(FBILRate))

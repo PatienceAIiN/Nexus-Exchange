@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
@@ -12,6 +12,7 @@ from models import Base, User, FBILRate, SignupStatus, UserRole
 from auth import get_password_hash
 from routes import auth_routes, admin_routes, rates_routes, processing_routes, profile_routes, support_routes
 from services.scheduler import setup_scheduler, scheduler
+from security import SlidingWindowRateLimiter, WSConnectionGuard
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -147,12 +148,23 @@ async def backfill_historical():
 
 app = FastAPI(title="Nexus Exchange API", lifespan=lifespan)
 
+allowed_origins = [o.strip() for o in settings.CORS_ALLOWED_ORIGINS.split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:4200", "http://localhost:3000", "*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+app.add_middleware(
+    SlidingWindowRateLimiter,
+    max_requests=settings.RATE_LIMIT_MAX_REQUESTS,
+    window_seconds=settings.RATE_LIMIT_WINDOW_SECONDS,
+)
+
+ws_guard = WSConnectionGuard(
+    max_per_ip=settings.WS_MAX_CONNECTIONS_PER_IP,
+    max_total=settings.WS_MAX_CONNECTIONS_TOTAL,
 )
 
 # Include routers
@@ -180,12 +192,20 @@ async def domain_redirect_middleware(request: Request, call_next):
 
 @app.websocket("/ws/rates")
 async def websocket_rates(websocket: WebSocket):
+    client_ip = websocket.client.host if websocket.client else "unknown"
+    if not ws_guard.allow(client_ip):
+        await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+        return
+
     await ws_manager.connect(websocket)
     try:
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
+        pass
+    finally:
         ws_manager.disconnect(websocket)
+        ws_guard.release(client_ip)
 
 # SPA / Static Serving Logic
 def setup_frontend(app: FastAPI):
