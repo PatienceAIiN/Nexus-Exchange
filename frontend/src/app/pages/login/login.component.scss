@@ -120,3 +120,13 @@
   .brand h1 { font-size: 24px; }
   .blob { display: none; } // Hide heavy blobs on small mobile for performance
 }
+
+
+.market-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.08) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at center,black 50%,transparent 95%);animation:gridDrift 14s linear infinite;}
+.ticker-strip{position:absolute;bottom:24px;left:0;right:0;overflow:hidden;opacity:.35;font-weight:600;white-space:nowrap;}
+.ticker-strip span{display:inline-block;padding-left:100%;animation:ticker 16s linear infinite;}
+.centered-auth-btn{justify-content:center;min-height:46px;position:relative;}
+.centered-auth-btn .spinner{margin-right:8px;animation:spin .7s linear infinite,pulse 1.2s ease-in-out infinite;}
+@keyframes ticker{to{transform:translateX(-100%);}}
+@keyframes gridDrift{to{transform:translate3d(-42px,-42px,0);}}
+@keyframes pulse{0%,100%{opacity:.7;}50%{opacity:1;}}

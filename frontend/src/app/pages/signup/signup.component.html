@@ -1,4 +1,7 @@
 <div class="auth-page">
+  <div class="market-grid"></div>
+  <div class="ticker-strip" aria-hidden="true"><span>₹ $ € £ ¥ • FX • NSE • BSE • Bonds • Commodities • Crypto • </span></div>
+
   <div class="blobs">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -52,7 +55,7 @@
           <div class="error-msg">{{ error }}</div>
         }
 
-        <button type="submit" class="btn btn-primary w-full" [disabled]="loading">
+        <button type="submit" class="btn btn-primary w-full centered-auth-btn" [disabled]="loading">
           @if (loading) { <span class="spinner"></span> } Request Access
         </button>
       </form>

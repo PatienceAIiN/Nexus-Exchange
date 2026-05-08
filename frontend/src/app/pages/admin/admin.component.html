@@ -14,7 +14,7 @@
         @if (showProfile) {
           <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:190" (click)="$event.stopPropagation(); showProfile=false"></div>
           <div class="profile-dropdown" style="position:absolute;z-index:200" (click)="$event.stopPropagation()">
-            <button (click)="openSupport()">🛟 Support</button>
+            <button class="support-btn" (click)="openSupport()">Support</button>
             <button class="danger" (click)="showProfile=false; logout()">🚪 Logout</button>
           </div>
         }
@@ -106,6 +106,7 @@
                         @if (actionLoading[user.id]==='rejecting') { <span class="spinner"></span> } ✕
                       </button>
                     }
+                    <button class="btn btn-outline" style="padding:5px 12px;font-size:12px" (click)="openView(user)">View</button>
                     <button class="btn btn-outline" style="padding:5px 12px;font-size:12px" (click)="openEdit(user)">
                       ✏️
                     </button>
@@ -159,6 +160,26 @@
           @if (actionLoading[editingUser.id]==='editing') { <span class="spinner"></span> } Save Changes
         </button>
         <button class="btn btn-ghost" (click)="editingUser=null">Cancel</button>
+      </div>
+    </div>
+  </div>
+}
+
+
+@if (viewingUser) {
+  <div class="modal-backdrop" (click)="viewingUser=null">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>👁 User Details</h2>
+      <div class="view-grid mt-24">
+        <p><strong>Username:</strong> {{ viewingUser.username }}</p>
+        <p><strong>Email:</strong> {{ viewingUser.email || '—' }}</p>
+        <p><strong>Role:</strong> {{ viewingUser.role }}</p>
+        <p><strong>Status:</strong> {{ viewingUser.signup_status }}</p>
+        <p><strong>Active:</strong> {{ viewingUser.is_active ? 'Yes' : 'No' }}</p>
+        <p><strong>Registered:</strong> {{ viewingUser.created_at | slice:0:10 }}</p>
+      </div>
+      <div class="modal-actions mt-24">
+        <button class="btn btn-ghost" (click)="viewingUser=null">Close</button>
       </div>
     </div>
   </div>
