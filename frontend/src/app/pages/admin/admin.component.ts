@@ -31,6 +31,7 @@ export class AdminComponent implements OnInit {
   editRole = '';
   editStatus = '';
   showProfile = false;
+  viewingUser: any = null;
 
   constructor(
     private http: HttpClient,
@@ -117,6 +118,10 @@ export class AdminComponent implements OnInit {
 
   confirmDelete(id: number): void {
     this.showDeleteConfirm = id;
+  }
+
+  openView(user: any): void {
+    this.viewingUser = user;
   }
 
   deleteUser(id: number): void {

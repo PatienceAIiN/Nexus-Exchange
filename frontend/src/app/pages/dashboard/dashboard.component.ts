@@ -120,9 +120,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 
   private autoRefreshRatesOnLogin(): void {
-    // Trigger a background refresh so newly scraped FBIL data is persisted and shown instantly after login
+    const nowUtc = new Date();
+    const istNow = new Date(nowUtc.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const istDate = istNow.toISOString().split('T')[0];
+    const istHour = istNow.getHours();
+    const refreshKey = `rates-auto-refresh-${this.user?.id || 'guest'}`;
+    const lastAutoRefreshDate = localStorage.getItem(refreshKey);
+
+    if (istHour < 13 || lastAutoRefreshDate === istDate) {
+      return;
+    }
+
     this.rates$.refresh().subscribe({
-      next: () => this.loadRates(),
+      next: () => {
+        localStorage.setItem(refreshKey, istDate);
+        this.loadRates();
+      },
       error: () => {
         // Keep UX smooth: initial data is still shown from loadRates() even if refresh fails
       }
@@ -164,6 +177,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   onDateFilterChange(): void {
+    if (!this.validateAndNormalizeDateRange()) return;
+    this.ratesPage = 1;
+    this.loadRates();
+  }
+
+  onCurrencyChange(): void {
     if (!this.validateAndNormalizeDateRange()) return;
     this.ratesPage = 1;
     this.loadRates();

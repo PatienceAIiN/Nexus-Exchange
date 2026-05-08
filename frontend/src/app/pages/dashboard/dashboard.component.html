@@ -26,7 +26,7 @@
               <strong>{{ user?.username }}</strong>
               <span class="badge {{ user?.role }}">{{ user?.role }}</span>
             </div>
-            <button (click)="openSupport()">🛟 Support</button>
+            <button class="support-btn" (click)="openSupport()">Support</button>
             <button (click)="showProfile=false; showChangePassword=true">🔑 Change Password</button>
             <button class="danger" (click)="showProfile=false; showLogout=true">🚪 Logout</button>
           </div>
@@ -52,7 +52,7 @@
           </div>
           <div class="control-group">
             <label>Currency</label>
-            <select [(ngModel)]="ratesCurrency" (change)="ratesPage=1; loadRates()">
+            <select [(ngModel)]="ratesCurrency" (change)="onCurrencyChange()">
               @for (c of currencies; track c) {
                 <option [value]="c">{{ c === 'all' ? 'All Currencies' : c }}</option>
               }
