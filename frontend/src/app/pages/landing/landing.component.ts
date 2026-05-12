@@ -1,5 +1,5 @@
 import { Component, ElementRef, HostListener, ViewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-landing',
@@ -9,6 +9,8 @@ import { RouterLink } from '@angular/router';
   styleUrl: './landing.component.scss'
 })
 export class LandingComponent {
+  constructor(private readonly router: Router) {}
+
   @ViewChild('loginDropdown') loginDropdown?: ElementRef<HTMLElement>;
 
   loginOpen = false;
@@ -20,6 +22,16 @@ export class LandingComponent {
 
   closeLoginMenu(): void {
     this.loginOpen = false;
+  }
+
+  goToClientLogin(): void {
+    this.closeLoginMenu();
+    this.router.navigate(['/login']);
+  }
+
+  goToAdminLogin(): void {
+    this.closeLoginMenu();
+    this.router.navigate(['/admin/login']);
   }
 
   @HostListener('document:click', ['$event'])
