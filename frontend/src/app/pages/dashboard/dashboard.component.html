@@ -114,10 +114,38 @@
             </table>
           </div>
 
-          <div class="pagination">
-            <button class="btn btn-ghost" (click)="prevPage()" [disabled]="ratesPage === 1">← Prev</button>
-            <span>Page {{ ratesPage }} of {{ ratesTotalPages }}</span>
-            <button class="btn btn-ghost" (click)="nextPage()" [disabled]="ratesPage === ratesTotalPages">Next →</button>
+          <div class="pagination custom-pagination" aria-label="Rates pagination">
+            <div class="pagination-summary">
+              Showing {{ ratesRangeStart }}-{{ ratesRangeEnd }} of {{ ratesTotal }} rates
+            </div>
+            <div class="pagination-controls">
+              <button class="page-btn nav-btn" (click)="prevPage()" [disabled]="ratesPage === 1" aria-label="Previous page">←</button>
+
+              @if (visibleRatePages[0] > 1) {
+                <button class="page-btn" (click)="goToRatesPage(1)">1</button>
+                @if (visibleRatePages[0] > 2) {
+                  <span class="page-ellipsis">…</span>
+                }
+              }
+
+              @for (page of visibleRatePages; track page) {
+                <button
+                  class="page-btn"
+                  [class.active]="page === ratesPage"
+                  (click)="goToRatesPage(page)"
+                  [attr.aria-current]="page === ratesPage ? 'page' : null"
+                >{{ page }}</button>
+              }
+
+              @if (visibleRatePages[visibleRatePages.length - 1] < ratesTotalPages) {
+                @if (visibleRatePages[visibleRatePages.length - 1] < ratesTotalPages - 1) {
+                  <span class="page-ellipsis">…</span>
+                }
+                <button class="page-btn" (click)="goToRatesPage(ratesTotalPages)">{{ ratesTotalPages }}</button>
+              }
+
+              <button class="page-btn nav-btn" (click)="nextPage()" [disabled]="ratesPage === ratesTotalPages" aria-label="Next page">→</button>
+            </div>
           </div>
         }
       </div>

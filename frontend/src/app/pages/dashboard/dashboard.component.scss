@@ -579,3 +579,67 @@
 }
 
 .profile-dropdown .support-btn{background:transparent;border:1px solid var(--border-color);text-align:center;font-weight:600;}
+
+.custom-pagination {
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 0 4px;
+
+  .pagination-summary {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .page-btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+
+    &:hover:not(:disabled) {
+      border-color: var(--accent-primary);
+      color: var(--text-primary);
+      transform: translateY(-1px);
+    }
+
+    &.active {
+      background: var(--accent-primary);
+      border-color: var(--accent-primary);
+      color: #001b16;
+      box-shadow: 0 8px 18px rgba(0, 212, 170, 0.22);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+      transform: none;
+    }
+  }
+
+  .nav-btn {
+    font-size: 16px;
+  }
+
+  .page-ellipsis {
+    color: var(--text-secondary);
+    padding: 0 4px;
+    font-weight: 700;
+  }
+}
