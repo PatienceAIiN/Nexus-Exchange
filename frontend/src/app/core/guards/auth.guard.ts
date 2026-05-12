@@ -17,6 +17,6 @@ export const adminGuard: CanActivateFn = () => {
   const router = inject(Router);
   return auth.isAdminAuthenticated$.pipe(
     take(1),
-    map(ok => ok ? true : router.createUrlTree(['/']))
+    map(ok => ok ? true : router.createUrlTree(['/admin/login'], { queryParams: { returnUrl: router.url } }))
   );
 };

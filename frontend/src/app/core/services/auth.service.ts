@@ -64,7 +64,7 @@ export class AuthService {
     this.router.navigate(['/']);
   }
 
-  adminLogout(): void {
+  adminLogout(redirectTo = '/'): void {
     localStorage.removeItem(this.ADMIN_TOKEN_KEY);
     localStorage.removeItem(this.ADMIN_USER_KEY);
     localStorage.removeItem(this.TOKEN_KEY);
@@ -72,7 +72,7 @@ export class AuthService {
     this.isAdminAuthenticated$.next(false);
     this.isAuthenticated$.next(false);
     this.currentUser$.next(null);
-    this.router.navigate(['/']);
+    this.router.navigateByUrl(redirectTo);
   }
 
   getToken(): string | null {
@@ -105,7 +105,12 @@ export class AuthService {
   private isTokenValid(token: string | null): boolean {
     if (!token) return false;
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
+      const payloadPart = token.split('.')[1];
+      if (!payloadPart) return false;
+
+      const base64 = payloadPart.replace(/-/g, '+').replace(/_/g, '/');
+      const paddedBase64 = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+      const payload = JSON.parse(atob(paddedBase64));
       return payload.exp > Date.now() / 1000;
     } catch { return false; }
   }
