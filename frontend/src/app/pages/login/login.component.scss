@@ -130,3 +130,42 @@
 @keyframes ticker{to{transform:translateX(-100%);}}
 @keyframes gridDrift{to{transform:translate3d(-42px,-42px,0);}}
 @keyframes pulse{0%,100%{opacity:.7;}50%{opacity:1;}}
+
+.home-icon-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 1200;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: var(--text-primary);
+  background: rgba(26, 32, 53, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  text-decoration: none;
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+  }
+
+  :root[data-theme="light"] & {
+    background: rgba(255, 255, 255, 0.86);
+    border-color: rgba(15, 23, 42, 0.1);
+  }
+}
+
+@media (max-width: 480px) {
+  .home-icon-btn {
+    top: 12px;
+    left: 12px;
+  }
+}
