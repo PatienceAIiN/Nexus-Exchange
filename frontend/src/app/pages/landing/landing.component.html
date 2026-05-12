@@ -8,11 +8,11 @@
 
   <header class="hero-header">
     <h1 class="gradient-text">Nexus Exchange</h1>
-    <div class="login-dropdown" [class.open]="loginOpen">
-      <button class="btn btn-primary" (click)="loginOpen = !loginOpen">Login Portal ▾</button>
-      <div class="menu" (mouseleave)="loginOpen=false">
-        <a routerLink="/login" class="menu-item">Client Login</a>
-        <a routerLink="/admin/login" class="menu-item">Admin Login</a>
+    <div #loginDropdown class="login-dropdown" [class.open]="loginOpen">
+      <button class="btn btn-primary" type="button" (click)="toggleLoginMenu($event)" [attr.aria-expanded]="loginOpen" aria-haspopup="menu">Login Portal ▾</button>
+      <div class="menu" role="menu">
+        <a routerLink="/login" class="menu-item" role="menuitem" (click)="closeLoginMenu()">Client Login</a>
+        <a routerLink="/admin/login" class="menu-item" role="menuitem" (click)="closeLoginMenu()">Admin Login</a>
       </div>
     </div>
   </header>
