@@ -18,7 +18,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         const isAuthReq = req.url.includes('/api/auth/');
         if (!isAuthReq) {
           if (isAdminReq) {
-            auth.adminLogout();
+            auth.adminLogout('/admin/login');
           } else {
             auth.logout();
           }
