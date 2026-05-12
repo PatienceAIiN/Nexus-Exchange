@@ -61,14 +61,18 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     this.isAuthenticated$.next(false);
     this.currentUser$.next(null);
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 
   adminLogout(): void {
     localStorage.removeItem(this.ADMIN_TOKEN_KEY);
     localStorage.removeItem(this.ADMIN_USER_KEY);
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.USER_KEY);
     this.isAdminAuthenticated$.next(false);
-    this.router.navigate(['/admin/login']);
+    this.isAuthenticated$.next(false);
+    this.currentUser$.next(null);
+    this.router.navigate(['/']);
   }
 
   getToken(): string | null {

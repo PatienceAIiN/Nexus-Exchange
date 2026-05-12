@@ -1,20 +1,16 @@
 <div class="landing-page">
+  <div class="aurora aurora-a" aria-hidden="true"></div>
+  <div class="aurora aurora-b" aria-hidden="true"></div>
+  <div class="aurora aurora-c" aria-hidden="true"></div>
   <div class="starfield" aria-hidden="true"></div>
-  <div class="nebula nebula-a"></div>
-  <div class="nebula nebula-b"></div>
-  <div class="orbit orbit-1"></div>
-  <div class="orbit orbit-2"></div>
-  <div class="market-grid"></div>
+  <div class="market-grid" aria-hidden="true"></div>
+  <div class="price-ribbon ribbon-a" aria-hidden="true"></div>
+  <div class="price-ribbon ribbon-b" aria-hidden="true"></div>
+  <div class="orbit orbit-1" aria-hidden="true"></div>
+  <div class="orbit orbit-2" aria-hidden="true"></div>
 
   <header class="hero-header">
     <h1 class="gradient-text">Nexus Exchange</h1>
-    <div #loginDropdown class="login-dropdown" [class.open]="loginOpen">
-      <button class="btn btn-primary" type="button" (click)="toggleLoginMenu($event)" [attr.aria-expanded]="loginOpen" aria-haspopup="menu">Login Portal ▾</button>
-      <div class="menu" role="menu">
-        <button type="button" class="menu-item" role="menuitem" (click)="goToClientLogin()">Client Login</button>
-        <button type="button" class="menu-item" role="menuitem" (click)="goToAdminLogin()">Admin Login</button>
-      </div>
-    </div>
   </header>
 
   <main class="hero-content">
