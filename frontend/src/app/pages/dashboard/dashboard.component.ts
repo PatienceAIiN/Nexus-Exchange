@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { ToastService } from '../../core/services/toast.service';
@@ -95,11 +95,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private ws: WebSocketService,
     private http: HttpClient,
     private supportModal: SupportModalService,
+    private router: Router,
   ) {}
 
   openSupport(): void { this.showProfile = false; this.supportModal.open(); }
 
   ngOnInit(): void {
+    if (!this.auth.isAuthenticated()) {
+      this.auth.logout();
+      return;
+    }
+
+    window.addEventListener('pageshow', this.handlePageShow);
+
     this.user = this.auth.currentUser$.value;
     this.isDark = this.theme.theme$.value === 'dark';
     this.subs.add(this.theme.theme$.subscribe(t => this.isDark = t === 'dark'));
@@ -117,11 +125,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    window.removeEventListener('pageshow', this.handlePageShow);
     this.subs.unsubscribe();
     if (this.progressRaf) cancelAnimationFrame(this.progressRaf);
     this.clearInfoChipTimers();
   }
 
+
+  private handlePageShow = (): void => {
+    if (!this.auth.isAuthenticated()) {
+      this.router.navigate(['/login'], { replaceUrl: true });
+    }
+  };
   setActiveTab(tab: 'rates' | 'processing'): void {
     this.activeTab = tab;
     if (tab === 'processing') {
