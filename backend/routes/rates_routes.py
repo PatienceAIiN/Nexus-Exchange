@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, and_
+from sqlalchemy import select, and_, func
 from database import get_db
 from models import FBILRate, User
 from auth import get_current_user
@@ -29,7 +29,7 @@ async def get_rates(
     to_date: Optional[date] = Query(None),
     currency_pair: Optional[str] = Query("all"),
     page: int = Query(1, ge=1),
-    per_page: int = Query(50, le=200),
+    per_page: int = Query(15, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -42,13 +42,21 @@ async def get_rates(
     if currency_pair and currency_pair != "all":
         conditions.append(FBILRate.currency_pair == currency_pair)
 
-    query = select(FBILRate).where(and_(*conditions)).order_by(FBILRate.date.desc(), FBILRate.currency_pair)
-    result = await db.execute(query)
-    all_rates = result.scalars().all()
-
-    total = len(all_rates)
+    total_result = await db.execute(
+        select(func.count()).select_from(FBILRate).where(and_(*conditions))
+    )
+    total = total_result.scalar_one()
     start = (page - 1) * per_page
-    paginated = all_rates[start:start + per_page]
+
+    query = (
+        select(FBILRate)
+        .where(and_(*conditions))
+        .order_by(FBILRate.date.desc(), FBILRate.currency_pair)
+        .offset(start)
+        .limit(per_page)
+    )
+    result = await db.execute(query)
+    paginated = result.scalars().all()
 
     return {
         "data": [{"id": r.id, "date": str(r.date), "time": r.time, "currency_pair": r.currency_pair,

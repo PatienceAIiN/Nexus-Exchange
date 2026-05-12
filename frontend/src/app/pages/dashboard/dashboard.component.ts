@@ -30,6 +30,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   rates: FBILRate[] = [];
   ratesTotalPages = 1;
   ratesPage = 1;
+  readonly ratesPerPage = 15;
+  ratesTotal = 0;
   ratesLoading = false;
   ratesRefreshing = false;
   ratesFromDate = '';
@@ -232,11 +234,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
       to_date: this.ratesToDate,
       currency_pair: this.ratesCurrency === 'all' ? '' : this.ratesCurrency,
       page: this.ratesPage,
-      per_page: 50,
+      per_page: this.ratesPerPage,
     }).subscribe({
       next: res => {
         this.rates = res.data;
-        this.ratesTotalPages = res.pages;
+        this.ratesTotal = res.total;
+        this.ratesPage = res.page;
+        this.ratesTotalPages = Math.max(res.pages, 1);
         this.ratesLoading = false;
       },
       error: () => { this.ratesLoading = false; this.toastSvc.error('Failed to load rates'); }
@@ -316,8 +320,32 @@ export class DashboardComponent implements OnInit, OnDestroy {
     });
   }
 
-  prevPage(): void { if (this.ratesPage > 1) { this.ratesPage--; this.loadRates(); } }
-  nextPage(): void { if (this.ratesPage < this.ratesTotalPages) { this.ratesPage++; this.loadRates(); } }
+  get ratesRangeStart(): number {
+    return this.ratesTotal === 0 ? 0 : (this.ratesPage - 1) * this.ratesPerPage + 1;
+  }
+
+  get ratesRangeEnd(): number {
+    return Math.min(this.ratesPage * this.ratesPerPage, this.ratesTotal);
+  }
+
+  get visibleRatePages(): number[] {
+    const visiblePages = 5;
+    const halfWindow = Math.floor(visiblePages / 2);
+    let start = Math.max(1, this.ratesPage - halfWindow);
+    const end = Math.min(this.ratesTotalPages, start + visiblePages - 1);
+
+    start = Math.max(1, end - visiblePages + 1);
+    return Array.from({ length: end - start + 1 }, (_, index) => start + index);
+  }
+
+  goToRatesPage(page: number): void {
+    if (page === this.ratesPage || page < 1 || page > this.ratesTotalPages) return;
+    this.ratesPage = page;
+    this.loadRates();
+  }
+
+  prevPage(): void { this.goToRatesPage(this.ratesPage - 1); }
+  nextPage(): void { this.goToRatesPage(this.ratesPage + 1); }
 
   // File upload
   onDragOver(e: DragEvent): void { e.preventDefault(); this.isDragging = true; }
