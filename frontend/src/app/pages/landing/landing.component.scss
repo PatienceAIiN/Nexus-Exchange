@@ -75,7 +75,18 @@
   z-index: 8;
 }
 .login-dropdown.open .menu { display: block; }
-.menu-item { display: block; color: var(--text-primary); text-decoration: none; padding: 10px; border-radius: 8px; }
+.menu-item {
+  display: block;
+  width: 100%;
+  color: var(--text-primary);
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 8px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
 .menu-item:hover { background: var(--bg-elevated); }
 
 .hero-content {
