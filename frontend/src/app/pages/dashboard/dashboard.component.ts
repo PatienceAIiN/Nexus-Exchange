@@ -53,6 +53,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   showResultModal = false;
   showHistoryModal = false;
   showFileGuideModal = false;
+  showInfoChip = false;
+  infoChipText = 'Need upload format help?';
   history: ProcessedFile[] = [];
   historyLoading = false;
   downloadingFileId: number | null = null;
@@ -82,6 +84,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   private subs = new Subscription();
   private wsSub?: Subscription;
+  private infoChipTimers: any[] = [];
 
   constructor(
     public auth: AuthService,
@@ -116,6 +119,54 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subs.unsubscribe();
     if (this.progressRaf) cancelAnimationFrame(this.progressRaf);
+    this.clearInfoChipTimers();
+  }
+
+  setActiveTab(tab: 'rates' | 'processing'): void {
+    this.activeTab = tab;
+    if (tab === 'processing') {
+      this.startInfoChipSequence();
+    }
+  }
+
+  private getInfoChipStorageKey(): string {
+    return `manual-info-chip-shown-${this.user?.id || 'guest'}`;
+  }
+
+  private startInfoChipSequence(): void {
+    const storageKey = this.getInfoChipStorageKey();
+    const shownCount = Number(sessionStorage.getItem(storageKey) || '0');
+    const maxShowsPerLogin = 3;
+    if (shownCount >= maxShowsPerLogin) return;
+
+    const remaining = maxShowsPerLogin - shownCount;
+    const messages = [
+      'Need upload format help?',
+      'Tap i for quick file instructions.',
+      'See CSV/XLSX format before upload.'
+    ];
+    const intervalMs = 2200; // equal interval, subtle
+    const visibleMs = 1500;
+
+    this.clearInfoChipTimers();
+    for (let i = 0; i < remaining; i++) {
+      const showT = setTimeout(() => {
+        this.infoChipText = messages[(shownCount + i) % messages.length];
+        this.showInfoChip = true;
+      }, i * intervalMs);
+      const hideT = setTimeout(() => {
+        this.showInfoChip = false;
+      }, i * intervalMs + visibleMs);
+      this.infoChipTimers.push(showT, hideT);
+    }
+
+    sessionStorage.setItem(storageKey, String(maxShowsPerLogin));
+  }
+
+  private clearInfoChipTimers(): void {
+    this.infoChipTimers.forEach(t => clearTimeout(t));
+    this.infoChipTimers = [];
+    this.showInfoChip = false;
   }
 
 

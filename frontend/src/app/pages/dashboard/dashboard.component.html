@@ -8,8 +8,8 @@
     </div>
 
     <nav class="tab-nav">
-      <button class="tab-btn" [class.active]="activeTab==='rates'" (click)="activeTab='rates'">📈 Live Rates</button>
-      <button class="tab-btn" [class.active]="activeTab==='processing'" (click)="activeTab='processing'">📂 Manual Update</button>
+      <button class="tab-btn" [class.active]="activeTab==='rates'" (click)="setActiveTab('rates')">📈 Live Rates</button>
+      <button class="tab-btn" [class.active]="activeTab==='processing'" (click)="setActiveTab('processing')">📂 Manual Update</button>
     </nav>
 
     <div class="header-right">
@@ -134,6 +134,9 @@
             <button class="info-icon-btn" type="button" title="File format instructions" (click)="showFileGuideModal=true">
               i
             </button>
+            @if (showInfoChip) {
+              <span class="info-chip">{{ infoChipText }}</span>
+            }
           </div>
           <p class="text-secondary mt-8">Upload your XLSX or CSV expense file to automatically fill in FBIL reference rates.</p>
 
