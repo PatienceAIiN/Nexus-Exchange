@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nexus-exchange.com/sitemap.xml
+Sitemap: https://nexusexchange.patienceai.in/sitemap.xml
