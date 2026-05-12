@@ -261,6 +261,53 @@
   h2 { font-size: 20px; font-weight: 600; }
 }
 
+.upload-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.info-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 212, 170, 0.45);
+  background: rgba(0, 212, 170, 0.12);
+  color: var(--accent-primary);
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .2s ease, background .2s ease;
+
+  &:hover {
+    background: rgba(0, 212, 170, 0.22);
+    box-shadow: 0 0 0 4px rgba(0, 212, 170, 0.16);
+    transform: translateY(-1px);
+  }
+}
+
+.guide-section {
+  h4 { font-size: 14px; margin-bottom: 8px; }
+  ul {
+    margin: 0;
+    padding-left: 18px;
+    display: grid;
+    gap: 6px;
+  }
+  code {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 1px 6px;
+    font-size: 12px;
+  }
+}
+
 .drop-zone {
   margin-top: 20px;
   border: 2px dashed var(--border-color);

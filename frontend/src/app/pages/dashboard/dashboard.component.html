@@ -129,7 +129,12 @@
 
         <!-- Upload Zone -->
         <div class="upload-card card">
-          <h2>Upload Expense File</h2>
+          <div class="upload-title-row">
+            <h2>Upload Expense File</h2>
+            <button class="info-icon-btn" type="button" title="File format instructions" (click)="showFileGuideModal=true">
+              i
+            </button>
+          </div>
           <p class="text-secondary mt-8">Upload your XLSX or CSV expense file to automatically fill in FBIL reference rates.</p>
 
           <div class="drop-zone"
@@ -215,6 +220,56 @@
       <div class="modal-actions mt-24">
         <button class="btn btn-primary" (click)="downloadResult()">⬇ Download Processed File</button>
         <button class="btn btn-ghost" (click)="showResultModal=false; clearFile()">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- FILE FORMAT GUIDE MODAL -->
+@if (showFileGuideModal) {
+  <div class="modal-backdrop" (click)="showFileGuideModal=false">
+    <div class="modal" (click)="$event.stopPropagation()">
+      <h2>ℹ️ File Upload Guide</h2>
+      <p class="text-secondary mt-8">Follow this simple format to help the system process your file quickly and accurately.</p>
+
+      <div class="guide-section mt-16">
+        <h4>Accepted file types</h4>
+        <ul>
+          <li><strong>.xlsx</strong> (Excel workbook)</li>
+          <li><strong>.csv</strong> (comma-separated values)</li>
+        </ul>
+      </div>
+
+      <div class="guide-section mt-16">
+        <h4>Required columns</h4>
+        <ul>
+          <li>A <strong>Date</strong> column (example: <code>2026-05-12</code>).</li>
+          <li>A <strong>Currency</strong> column (example: <code>USD</code>, <code>EUR</code>, <code>JPY</code>).</li>
+          <li>The system auto-fills a <strong>Ref Rate</strong> column (or updates existing one).</li>
+        </ul>
+      </div>
+
+      <div class="guide-section mt-16">
+        <h4>Formatting tips for best results</h4>
+        <ul>
+          <li>Keep one clear header row (column names) near the top.</li>
+          <li>Use standard currency codes in uppercase (USD, EUR, GBP, etc.).</li>
+          <li>Avoid fully blank data rows between records.</li>
+          <li>Check date values are valid and consistent across rows.</li>
+        </ul>
+      </div>
+
+      <div class="guide-section mt-16">
+        <h4>What you get after processing</h4>
+        <ul>
+          <li>Matched rows are populated with FBIL reference rates.</li>
+          <li>A processing summary with total, matched, and unmatched rows.</li>
+          <li>A downloadable processed file from the result/history section.</li>
+        </ul>
+      </div>
+
+      <div class="modal-actions mt-24">
+        <button class="btn btn-primary" (click)="showFileGuideModal=false">Got it</button>
       </div>
     </div>
   </div>

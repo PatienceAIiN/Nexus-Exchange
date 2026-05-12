@@ -52,6 +52,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private progressStart = 0;
   showResultModal = false;
   showHistoryModal = false;
+  showFileGuideModal = false;
   history: ProcessedFile[] = [];
   historyLoading = false;
   downloadingFileId: number | null = null;
