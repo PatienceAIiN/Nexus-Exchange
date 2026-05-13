@@ -71,7 +71,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
   showChangePassword = false;
   showLogout = false;
   showProfile = false;
+  showProfileDetails = false;
+  showDownloadModal = false;
   profile: any = null;
+  profileForm = { username: '', email: '', avatar_seed: '' };
+  savingProfile = false;
+  profileError = '';
 
   // Change password
   oldPwd = ''; newPwd = ''; confirmPwd = '';
@@ -101,6 +106,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   openSupport(): void { this.showProfile = false; this.supportModal.open(); }
+
+  toggleProfileMenu(event: MouseEvent): void {
+    event.stopPropagation();
+    this.showProfile = !this.showProfile;
+  }
+
+  openDownloadDialog(): void {
+    this.showDownloadModal = true;
+  }
+
+  openProfileDetails(): void {
+    this.showProfile = false;
+    this.profileError = '';
+    this.syncProfileForm();
+    this.showProfileDetails = true;
+  }
+
+  closeProfileDetails(): void {
+    this.showProfileDetails = false;
+    this.profileError = '';
+  }
 
   ngOnInit(): void {
     if (!this.auth.isAuthenticated()) {
@@ -162,8 +188,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       'Tap i for quick file instructions.',
       'See CSV/XLSX format before upload.'
     ];
-    const intervalMs = 2200; // equal interval, subtle
-    const visibleMs = 1500;
+    const intervalMs = 4200;
+    const visibleMs = 2600;
 
     this.clearInfoChipTimers();
     for (let i = 0; i < remaining; i++) {
@@ -212,8 +238,46 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
   loadProfile(): void {
     this.http.get<any>('/api/profile').subscribe({
-      next: p => this.profile = p,
+      next: p => { this.profile = p; this.syncProfileForm(); },
       error: () => {}
+    });
+  }
+
+
+  private syncProfileForm(): void {
+    this.profileForm = {
+      username: this.profile?.username || this.user?.username || '',
+      email: this.profile?.email || '',
+      avatar_seed: this.profile?.avatar_seed || this.user?.username || '',
+    };
+  }
+
+  saveProfileDetails(): void {
+    const username = this.profileForm.username.trim();
+    const email = this.profileForm.email.trim();
+    const avatar_seed = this.profileForm.avatar_seed.trim() || username;
+
+    if (!username) {
+      this.profileError = 'Username is required';
+      return;
+    }
+
+    this.savingProfile = true;
+    this.profileError = '';
+    this.http.put<any>('/api/profile', { username, email: email || null, avatar_seed }).subscribe({
+      next: (updated) => {
+        this.profile = updated;
+        this.user = { ...this.user, username: updated.username, role: updated.role, id: updated.id };
+        this.auth.updateCurrentUser(this.user);
+        this.syncProfileForm();
+        this.savingProfile = false;
+        this.showProfileDetails = false;
+        this.toastSvc.success('Profile updated successfully');
+      },
+      error: (e) => {
+        this.savingProfile = false;
+        this.profileError = e.error?.detail || 'Failed to update profile';
+      }
     });
   }
 
@@ -306,6 +370,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         a.href = url; a.download = `fbil_rates.${format}`; a.click();
         URL.revokeObjectURL(url);
         this.downloadingFormat = '';
+        this.showDownloadModal = false;
       },
       error: () => { this.downloadingFormat = ''; this.toastSvc.error('Download failed'); }
     });

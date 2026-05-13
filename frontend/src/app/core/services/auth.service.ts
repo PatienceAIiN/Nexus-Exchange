@@ -75,6 +75,11 @@ export class AuthService {
     this.router.navigateByUrl(redirectTo);
   }
 
+  updateCurrentUser(user: any): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+    this.currentUser$.next(user);
+  }
+
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }

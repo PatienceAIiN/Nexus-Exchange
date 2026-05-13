@@ -67,6 +67,12 @@ class AvatarUpdate(BaseModel):
     avatar_seed: str
 
 
+class ProfileUpdate(BaseModel):
+    username: str
+    email: Optional[str] = None
+    avatar_seed: Optional[str] = None
+
+
 class SupportRequestCreate(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None

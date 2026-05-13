@@ -8,8 +8,8 @@
     </div>
 
     <nav class="tab-nav">
-      <button class="tab-btn" [class.active]="activeTab==='rates'" (click)="setActiveTab('rates')">📈 Live Rates</button>
-      <button class="tab-btn" [class.active]="activeTab==='processing'" (click)="setActiveTab('processing')">📂 Manual Update</button>
+      <button class="tab-btn" [class.active]="activeTab==='rates'" (click)="setActiveTab('rates')"><span>📈</span> Live Rates</button>
+      <button class="tab-btn" [class.active]="activeTab==='processing'" (click)="setActiveTab('processing')"><span>📂</span> Manual Update</button>
     </nav>
 
     <div class="header-right">
@@ -17,16 +17,19 @@
         {{ isDark ? '☀️' : '🌙' }}
       </button>
 
-      <div class="avatar-wrapper" (click)="showProfile=!showProfile">
+      <div class="avatar-wrapper" (click)="toggleProfileMenu($event)">
         <img [src]="avatarUrl(profile?.avatar_seed || user?.username)" class="avatar" alt="avatar" />
         @if (showProfile) {
           <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:190" (click)="$event.stopPropagation(); showProfile=false"></div>
           <div class="profile-dropdown" style="position:absolute;z-index:200" (click)="$event.stopPropagation()">
-            <div class="profile-user">
-              <strong>{{ user?.username }}</strong>
+            <button class="profile-user" type="button" (click)="openProfileDetails()">
+              <span>
+                <strong>{{ profileForm.username || user?.username }}</strong>
+                <small>View & edit profile</small>
+              </span>
               <span class="badge {{ user?.role }}">{{ user?.role }}</span>
-            </div>
-            <button class="support-btn" (click)="openSupport()">Support</button>
+            </button>
+            <button class="support-btn" (click)="openSupport()"><span>💬</span> Support</button>
             <button (click)="showProfile=false; showChangePassword=true">🔑 Change Password</button>
             <button class="danger" (click)="showProfile=false; showLogout=true">🚪 Logout</button>
           </div>
@@ -66,14 +69,9 @@
             </button>
 
             <div class="download-group">
-              <button class="btn btn-ghost" [disabled]="!!downloadingFormat">
-                @if (downloadingFormat) { <span class="spinner"></span> } @else { ⬇ } Download
+              <button class="btn btn-ghost" (click)="openDownloadDialog()" [disabled]="!!downloadingFormat">
+                @if (downloadingFormat) { <span class="spinner"></span> Preparing... } @else { ⬇ Download }
               </button>
-              <div class="download-menu">
-                <button (click)="downloadRates('csv')" [disabled]="downloadingFormat==='csv'">CSV</button>
-                <button (click)="downloadRates('xlsx')" [disabled]="downloadingFormat==='xlsx'">Excel</button>
-                <button (click)="downloadRates('pdf')" [disabled]="downloadingFormat==='pdf'">PDF</button>
-              </div>
             </div>
           </div>
         </div>
@@ -97,7 +95,6 @@
                   <th>Time</th>
                   <th (click)="sort('currency_pair')">Currency Pair {{ sortCol==='currency_pair' ? (sortDir==='asc'?'↑':'↓') : '' }}</th>
                   <th (click)="sort('rate')">Rate {{ sortCol==='rate' ? (sortDir==='asc'?'↑':'↓') : '' }}</th>
-                  <th>Comments</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,7 +104,6 @@
                     <td class="text-secondary">{{ rate.time || '—' }}</td>
                     <td><span class="currency-chip">{{ rate.currency_pair }}</span></td>
                     <td class="mono rate-val">{{ rate.rate }}</td>
-                    <td class="text-secondary">{{ rate.comments || '—' }}</td>
                   </tr>
                 }
               </tbody>
@@ -214,6 +210,36 @@
     <span>All copyright reserved &#64;2026 • A product of <a href="https://patienceai.in" target="_blank" rel="noopener"><strong>Patience AI</strong></a></span>
   </footer>
 </div>
+
+
+<!-- DOWNLOAD FORMAT MODAL -->
+@if (showDownloadModal) {
+  <div class="modal-backdrop" (click)="showDownloadModal=false">
+    <div class="modal download-modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" type="button" (click)="showDownloadModal=false">✕</button>
+      <div class="modal-kicker">Export rates</div>
+      <h2>Choose download format</h2>
+      <p class="text-secondary mt-8">Download the currently selected date range as a clean report.</p>
+      <div class="format-grid mt-24">
+        <button class="format-card" type="button" (click)="downloadRates('csv')" [disabled]="!!downloadingFormat">
+          <span class="format-icon">CSV</span>
+          <strong>CSV File</strong>
+          <small>Spreadsheet-friendly raw data</small>
+        </button>
+        <button class="format-card" type="button" (click)="downloadRates('xlsx')" [disabled]="!!downloadingFormat">
+          <span class="format-icon">XLS</span>
+          <strong>Excel Workbook</strong>
+          <small>Formatted workbook export</small>
+        </button>
+        <button class="format-card" type="button" (click)="downloadRates('pdf')" [disabled]="!!downloadingFormat">
+          <span class="format-icon">PDF</span>
+          <strong>PDF Report</strong>
+          <small>Shareable snapshot report</small>
+        </button>
+      </div>
+    </div>
+  </div>
+}
 
 <!-- PROCESSING RESULT MODAL -->
 @if (showResultModal && processResult) {
@@ -363,6 +389,51 @@
       }
       <div class="modal-actions mt-24">
         <button class="btn btn-ghost" (click)="showHistoryModal=false">Close</button>
+      </div>
+    </div>
+  </div>
+}
+
+
+<!-- PROFILE DETAILS MODAL -->
+@if (showProfileDetails) {
+  <div class="modal-backdrop" (click)="closeProfileDetails()">
+    <div class="modal profile-modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" type="button" (click)="closeProfileDetails()">✕</button>
+      <div class="profile-hero">
+        <img [src]="avatarUrl(profileForm.avatar_seed || profileForm.username)" class="profile-hero-avatar" alt="profile avatar" />
+        <div>
+          <div class="modal-kicker">Account profile</div>
+          <h2>{{ profileForm.username || user?.username }}</h2>
+          <span class="badge {{ user?.role }}">{{ user?.role }}</span>
+        </div>
+      </div>
+
+      <div class="mt-24">
+        <div class="input-group">
+          <label>Username</label>
+          <input type="text" [(ngModel)]="profileForm.username" placeholder="Username" />
+        </div>
+        <div class="input-group">
+          <label>Email</label>
+          <input type="email" [(ngModel)]="profileForm.email" placeholder="Email address" />
+        </div>
+        <div class="input-group">
+          <label>Avatar seed</label>
+          <input type="text" [(ngModel)]="profileForm.avatar_seed" placeholder="Avatar style seed" />
+        </div>
+        <div class="profile-meta">
+          <span>User ID: {{ profile?.id || user?.id }}</span>
+          <span>Created: {{ profile?.created_at | slice:0:10 }}</span>
+        </div>
+        @if (profileError) { <div class="error-msg">{{ profileError }}</div> }
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn btn-primary" [disabled]="savingProfile" (click)="saveProfileDetails()">
+          @if (savingProfile) { <span class="spinner"></span> } Save Profile
+        </button>
+        <button class="btn btn-ghost" (click)="closeProfileDetails()">Cancel</button>
       </div>
     </div>
   </div>
