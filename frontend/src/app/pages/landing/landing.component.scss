@@ -246,7 +246,10 @@ h2 {
 
 .exchange-visual {
   position: relative;
+  width: min(100%, 460px);
+  justify-self: center;
   min-height: 500px;
+  aspect-ratio: 0.9 / 1;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 30px;
   background:
@@ -382,7 +385,10 @@ h2 {
 
   .hero-copy .sub { margin-left: auto; }
   .cta-row { justify-content: center; }
-  .exchange-visual { min-height: 430px; }
+  .exchange-visual {
+    width: min(100%, 520px);
+    min-height: 420px;
+  }
 }
 
 @media (max-width: 520px) {
@@ -393,7 +399,7 @@ h2 {
   }
 
   .exchange-visual {
-    min-height: 390px;
+    min-height: 360px;
     border-radius: 24px;
   }
 
@@ -402,9 +408,13 @@ h2 {
   .visual-node { width: 74px; height: 74px; border-radius: 20px; font-size: 12px; }
   .node-a { top: 54px; left: 18px; }
   .node-b { top: 50px; right: 20px; }
-  .node-c { bottom: 106px; right: 28px; }
-  .visual-card { left: 18px; bottom: 96px; min-width: 154px; padding: 12px; }
+  .node-c { bottom: 96px; right: 20px; }
+  .visual-card { left: 12px; right: 12px; bottom: 94px; min-width: 0; padding: 12px; }
   .visual-card strong { font-size: 18px; }
+  .connector { width: 108px; }
+  .connector-a { top: 152px; left: 76px; }
+  .connector-b { top: 160px; right: 80px; }
+  .connector-c { bottom: 156px; right: 90px; }
   .feature-strip { grid-template-columns: 1fr; bottom: 14px; }
   .feature-strip span { padding: 8px; }
 }
