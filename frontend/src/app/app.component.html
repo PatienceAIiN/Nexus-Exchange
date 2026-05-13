@@ -1,5 +1,5 @@
 @if (showFloatingSupport) {
-  <button class="support-fab" (click)="openSupport()">Support</button>
+  <button class="support-fab" type="button" aria-label="Open support" title="Support" (click)="openSupport()">💬</button>
 }
 
 @if (supportOpen) {
@@ -7,7 +7,6 @@
     <div class="modal support-modal" (click)="$event.stopPropagation()">
       <button class="close-btn" (click)="closeSupport()">✕</button>
       <h2>Support Contact</h2>
-      <p class="muted">Need help? Fill this form and our team will get back to you.</p>
       <form (ngSubmit)="submitSupport()">
         <div class="input-group">
           <label>Username</label>
