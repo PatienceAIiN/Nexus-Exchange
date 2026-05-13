@@ -58,7 +58,8 @@ def _send_admin_notification(username: str, admin_email: str):
 
 @router.post("/login", response_model=Token)
 async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(User).where(User.username == data.username))
+    username = data.username.strip()
+    result = await db.execute(select(User).where(User.username == username))
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(data.password, user.password_hash):
