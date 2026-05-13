@@ -50,6 +50,7 @@
 .l-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
 .l-nav-links { display: flex; align-items: center; gap: 28px; }
 .l-link { color: rgba(240,244,248,0.72); text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: 0.02em; transition: color .2s; &:hover{color:#f0f4f8;} }
+.support-nav-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(0,212,170,.35); background: rgba(0,212,170,.08); color: #f0f4f8; cursor: pointer; font-size: 20px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 18px rgba(0,212,170,.16); transition: transform .2s, border-color .2s, background .2s; &:hover{ transform: translateY(-1px); border-color: rgba(0,212,170,.7); background: rgba(0,212,170,.16); } }
 
 .l-section { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 24px 60px; }
 .hero-section { padding-top: 120px; }

@@ -5,10 +5,7 @@
   <nav class="l-nav">
     <span class="l-logo gradient-text">Nexus Exchange</span>
     <div class="l-nav-links">
-      <a href="#rates-section" class="l-link">Live Rates</a>
-      <a href="#features-section" class="l-link">Features</a>
-      <a routerLink="/login" class="l-link">Client Login</a>
-      <a routerLink="/signup" class="btn btn-primary l-cta">Request Access</a>
+      <button class="support-nav-btn" type="button" aria-label="Open support" title="Support" (click)="openSupport()">💬</button>
     </div>
   </nav>
 
@@ -17,11 +14,6 @@
     <h1 class="hero-headline">
       Every Rate.<br />Every Trade.<br /><em class="accent-em">One Cockpit.</em>
     </h1>
-    <p class="hero-sub">Live FBIL reference rates. Automated file processing. Audit-ready workflows. All secured under a single exchange platform.</p>
-    <div class="hero-actions">
-      <a routerLink="/signup" class="btn btn-primary hero-btn">Request Access</a>
-      <a routerLink="/login" class="btn btn-outline hero-btn">Enter Portal →</a>
-    </div>
     <div class="scroll-cue" aria-hidden="true"><span></span></div>
   </section>
 
@@ -42,8 +34,6 @@
         <div class="ticker-item"><span class="pair">INR / AED</span><span class="rate">₹22.91</span></div>
       </div>
     </div>
-    <p class="section-sub">FBIL-sourced reference rates updated daily. Filter, download, and integrate directly into your workflow.</p>
-    <a routerLink="/login" class="btn btn-outline">Access Rate Dashboard →</a>
   </section>
 
   <section class="l-section features-section" id="features-section">
@@ -71,10 +61,6 @@
   <section class="l-section cta-section">
     <h2 class="cta-headline">The exchange cockpit<br />your team deserves.</h2>
     <p class="cta-sub">Request access today. Admin approval keeps the platform secure and enterprise-ready.</p>
-    <div class="cta-actions">
-      <a routerLink="/signup" class="btn btn-primary cta-btn">Request Access</a>
-      <a routerLink="/login" class="btn btn-outline cta-btn">Client Login</a>
-    </div>
     <footer class="l-footer">
       All copyright reserved &copy;2026 &bull;
       A product of <a href="https://patienceai.in" target="_blank" rel="noopener"><strong>Patience AI</strong></a>
