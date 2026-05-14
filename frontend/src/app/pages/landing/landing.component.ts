@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { SupportModalService } from '../../core/services/support-modal.service';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
+  imports: [RouterLink],
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss'
 })
