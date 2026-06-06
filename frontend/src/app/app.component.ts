@@ -17,7 +17,7 @@ import { filter } from 'rxjs';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'frontend';
+  title = 'Nexus Exchange';
   supportOpen = false;
   showFloatingSupport = false;
   loading = false;
