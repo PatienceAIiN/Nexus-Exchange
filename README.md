@@ -1,15 +1,15 @@
 # Nexus Exchange 🛡️
 
-A premium, full-stack FBIL Reference Rate Management Platform built for high-performance financial data processing and administrative oversight.
+A premium, full-stack Reference Rate Management Platform built for high-performance financial data processing and administrative oversight.
 
 ![Nexus Exchange Dashboard](https://api.dicebear.com/8.x/shapes/svg?seed=nexus&backgroundColor=0f172a)
 
 ## 🚀 Overview
 
-Nexus Exchange is designed to automate the lifecycle of FBIL (Financial Benchmarks India Pvt. Ltd.) exchange rates—from automated scraping and real-time WebSocket updates to bulk file processing and administrative approval workflows.
+Nexus Exchange automates the lifecycle of official reference exchange rates — from automated scraping and real-time WebSocket updates to bulk file processing and administrative approval workflows.
 
 ### Key Features:
-- **Real-Time Rates**: Automated scraping of FBIL rates with instant WebSocket broadcasting to clients.
+- **Real-Time Rates**: Automated scraping of reference rates with instant WebSocket broadcasting to clients.
 - **High-Speed Processing**: Bulk upload and processing of `.xlsx` and `.csv` files with a smooth, real-time percentage progress bar.
 - **Admin Command Center**: Secure, separate administrative panel for managing user approvals, role assignments, and platform statistics.
 - **Smart Security**: Token-versioning system for immediate session invalidation on role changes and automated "self-healing" admin credentials.
@@ -23,7 +23,7 @@ Nexus Exchange is designed to automate the lifecycle of FBIL (Financial Benchmar
 - **Framework**: FastAPI (Python 3.10+)
 - **Database**: PostgreSQL (via Neon DB) with SQLAlchemy (Asyncio)
 - **Security**: JWT Authentication + Passlib (Bcrypt)
-- **Task Scheduling**: APScheduler (for automated FBIL scraping)
+- **Task Scheduling**: APScheduler (for automated rate scraping)
 - **Storage**: Cloudflare R2 (S3-compatible) for file storage
 - **Email**: SMTP integration for automated approval notifications
 

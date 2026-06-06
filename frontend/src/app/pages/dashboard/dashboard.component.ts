@@ -284,7 +284,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   connectWS(): void {
     this.wsSub = this.ws.connect().subscribe(msg => {
       if (msg.event === 'rates_updated') {
-        this.toastSvc.success('FBIL rates updated in real-time');
+        this.toastSvc.success('Reference rates updated in real-time');
         this.loadRates();
       }
     });
@@ -367,7 +367,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       next: (blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `fbil_rates.${format}`; a.click();
+        a.href = url; a.download = `reference_rates.${format}`; a.click();
         URL.revokeObjectURL(url);
         this.downloadingFormat = '';
         this.showDownloadModal = false;

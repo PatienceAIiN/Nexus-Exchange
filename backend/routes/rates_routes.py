@@ -150,8 +150,8 @@ async def download_rates(
     elif format == "xlsx":
         output = io.BytesIO()
         with pd.ExcelWriter(output, engine="openpyxl") as writer:
-            df.to_excel(writer, index=False, sheet_name="FBIL Rates")
-            ws = writer.sheets["FBIL Rates"]
+            df.to_excel(writer, index=False, sheet_name="Reference Rates")
+            ws = writer.sheets["Reference Rates"]
             for col in ws.columns:
                 ws.column_dimensions[col[0].column_letter].width = 20
 
@@ -174,7 +174,7 @@ async def download_rates(
         doc = SimpleDocTemplate(output, pagesize=landscape(A4))
         styles = getSampleStyleSheet()
         elements = []
-        elements.append(Paragraph("FBIL Reference Rates", styles["Title"]))
+        elements.append(Paragraph("Reference Rates", styles["Title"]))
         elements.append(Paragraph(f"Period: {from_date} to {to_date}", styles["Normal"]))
         elements.append(Spacer(1, 12))
 
@@ -202,7 +202,7 @@ async def download_rates(
     else:
         raise HTTPException(status_code=400, detail="Invalid format")
 
-    filename = f"fbil_rates_{from_date}_{to_date}.{ext}"
+    filename = f"reference_rates_{from_date}_{to_date}.{ext}"
     return StreamingResponse(
         io.BytesIO(content),
         media_type=media_type,

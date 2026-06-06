@@ -4,7 +4,7 @@ import { authGuard, adminGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    title: 'Nexus Exchange — FBIL Reference Rate Platform',
+    title: 'Nexus Exchange — Reference Rate Management Platform',
     loadComponent: () => import('./pages/landing/landing.component').then(m => m.LandingComponent),
   },
   {

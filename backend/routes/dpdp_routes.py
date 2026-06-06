@@ -17,7 +17,7 @@ POLICY = {
     "contact": "dpo@patienceai.in",
     "purposes": [
         "Authentication and account management",
-        "Processing FBIL reference rate data you upload",
+        "Processing reference rate data you upload",
         "Service operations, security, audit logging",
         "Support communications you initiate",
     ],
