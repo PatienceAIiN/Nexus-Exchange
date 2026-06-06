@@ -10,7 +10,7 @@ from config import settings
 from database import engine, AsyncSessionLocal
 from models import Base, User, FBILRate, SignupStatus, UserRole
 from auth import get_password_hash
-from routes import auth_routes, admin_routes, rates_routes, processing_routes, profile_routes, support_routes
+from routes import auth_routes, admin_routes, rates_routes, processing_routes, profile_routes, support_routes, dpdp_routes
 from services.scheduler import setup_scheduler, scheduler
 from security import SlidingWindowRateLimiter, WSConnectionGuard
 
@@ -174,6 +174,7 @@ app.include_router(rates_routes.router)
 app.include_router(processing_routes.router)
 app.include_router(profile_routes.router)
 app.include_router(support_routes.router)
+app.include_router(dpdp_routes.router)
 
 @app.middleware("http")
 async def domain_redirect_middleware(request: Request, call_next):

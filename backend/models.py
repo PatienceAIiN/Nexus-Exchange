@@ -51,6 +51,19 @@ class ProcessedFile(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
 
 
+class DPDPConsent(Base):
+    __tablename__ = "dpdp_consents"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, nullable=True, index=True)
+    visitor_id = Column(String(100), nullable=True, index=True)
+    ip_address = Column(String(64), nullable=True)
+    user_agent = Column(String(500), nullable=True)
+    consent_given = Column(Boolean, default=False, nullable=False)
+    policy_version = Column(String(20), default="1.0", nullable=False)
+    purposes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+
 class SupportRequest(Base):
     __tablename__ = "support_requests"
     id = Column(Integer, primary_key=True, autoincrement=True)

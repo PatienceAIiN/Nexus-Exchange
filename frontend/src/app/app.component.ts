@@ -6,12 +6,13 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from './core/services/auth.service';
 import { SupportModalService } from './core/services/support-modal.service';
+import { DpdpBannerComponent } from './core/components/dpdp-banner/dpdp-banner.component';
 import { filter } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, FormsModule],
+  imports: [RouterOutlet, CommonModule, FormsModule, DpdpBannerComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

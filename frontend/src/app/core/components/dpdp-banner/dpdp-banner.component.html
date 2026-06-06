@@ -1,0 +1,65 @@
+@if (visible) {
+  <div class="dpdp-banner" role="dialog" aria-live="polite" aria-label="Data Protection Notice">
+    <div class="dpdp-inner">
+      <div class="dpdp-icon" aria-hidden="true">🛡️</div>
+      <div class="dpdp-content">
+        <div class="dpdp-title">
+          We respect your data — Notice under India's DPDP Act, 2023
+        </div>
+        <div class="dpdp-text">
+          {{ policy?.data_fiduciary }} processes your personal data
+          (account identifiers, uploaded files, technical metadata) to operate
+          this platform. You may accept or decline. You can withdraw consent
+          and exercise your rights anytime via
+          <a [href]="'mailto:' + (policy?.contact || '')">{{ policy?.contact }}</a>.
+        </div>
+
+        @if (detailsOpen && policy) {
+          <div class="dpdp-details">
+            <div class="dpdp-section">
+              <strong>Purposes of processing</strong>
+              <ul>
+                @for (p of policy.purposes; track p) { <li>{{ p }}</li> }
+              </ul>
+            </div>
+            <div class="dpdp-section">
+              <strong>Categories of personal data</strong>
+              <ul>
+                @for (c of policy.categories; track c) { <li>{{ c }}</li> }
+              </ul>
+            </div>
+            <div class="dpdp-section">
+              <strong>Retention</strong>
+              <p>{{ policy.retention }}</p>
+            </div>
+            <div class="dpdp-section">
+              <strong>Your rights as a Data Principal</strong>
+              <ul>
+                @for (r of policy.rights; track r) { <li>{{ r }}</li> }
+              </ul>
+            </div>
+            <div class="dpdp-section">
+              <strong>Grievance officer</strong>
+              <p>{{ policy.grievance_officer }}</p>
+            </div>
+            <div class="dpdp-version">Policy version: {{ policy.version }}</div>
+          </div>
+        }
+
+        @if (error) { <div class="dpdp-error">{{ error }}</div> }
+
+        <div class="dpdp-actions">
+          <button type="button" class="dpdp-btn dpdp-btn-link" (click)="toggleDetails()">
+            {{ detailsOpen ? 'Hide details' : 'View full notice' }}
+          </button>
+          <button type="button" class="dpdp-btn dpdp-btn-secondary" (click)="reject()" [disabled]="loading">
+            Decline
+          </button>
+          <button type="button" class="dpdp-btn dpdp-btn-primary" (click)="accept()" [disabled]="loading">
+            {{ loading ? 'Saving…' : 'Accept & continue' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

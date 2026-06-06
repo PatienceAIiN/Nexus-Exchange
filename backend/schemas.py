@@ -73,6 +73,23 @@ class ProfileUpdate(BaseModel):
     avatar_seed: Optional[str] = None
 
 
+class DPDPConsentCreate(BaseModel):
+    visitor_id: Optional[str] = None
+    consent_given: bool
+    policy_version: Optional[str] = "1.0"
+    purposes: Optional[List[str]] = None
+
+
+class DPDPConsentResponse(BaseModel):
+    id: int
+    consent_given: bool
+    policy_version: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class SupportRequestCreate(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
