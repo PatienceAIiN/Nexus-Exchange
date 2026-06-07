@@ -22,12 +22,13 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str = Field("admin123secure", validation_alias=AliasChoices("ADMIN_PASSWORD", "ADMIN_PASS", "ADMIN_SECRET"))
     ADMIN_EMAIL: str = ""
 
-    SMTP_HOST: str = "smtpout.secureserver.net"
+    SMTP_HOST: str = "smtp-relay.brevo.com"
     SMTP_PORT: int = 587
     SMTP_USER: str = ""
     SMTP_PASS: str = ""
     SMTP_SECURE: bool = False
     SMTP_SENDER_NAME: str = "Nexus Exchange"
+    SMTP_FROM_EMAIL: str = ""
     CONTACT_TO_EMAIL: str = ""
     SITE_URL: str = "http://localhost:8000"
 

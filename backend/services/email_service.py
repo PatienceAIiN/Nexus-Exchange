@@ -15,28 +15,29 @@ def send_email(to: str, subject: str, html_body: str) -> bool:
         return False
 
     try:
+        from_email = settings.SMTP_FROM_EMAIL or settings.SMTP_USER
         msg = MIMEMultipart("alternative")
         msg["Subject"] = subject
-        msg["From"] = settings.SMTP_USER
+        msg["From"] = f"{settings.SMTP_SENDER_NAME} <{from_email}>"
         msg["To"] = to
 
         part = MIMEText(html_body, "html")
         msg.attach(part)
 
         timeout = 10  # 10 seconds timeout for SMTP operations
-        
+
         if settings.SMTP_SECURE:
             logger.info(f"Connecting to SMTP via SSL: {settings.SMTP_HOST}:{settings.SMTP_PORT}")
             context = ssl.create_default_context()
             with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, context=context, timeout=timeout) as server:
                 server.login(settings.SMTP_USER, settings.SMTP_PASS)
-                server.sendmail(settings.SMTP_USER, to, msg.as_string())
+                server.sendmail(from_email, to, msg.as_string())
         else:
             logger.info(f"Connecting to SMTP via STARTTLS: {settings.SMTP_HOST}:{settings.SMTP_PORT}")
             with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=timeout) as server:
                 server.starttls()
                 server.login(settings.SMTP_USER, settings.SMTP_PASS)
-                server.sendmail(settings.SMTP_USER, to, msg.as_string())
+                server.sendmail(from_email, to, msg.as_string())
 
         logger.info(f"Email successfully sent to {to}: {subject}")
         return True
