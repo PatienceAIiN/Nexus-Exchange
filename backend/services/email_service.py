@@ -1,46 +1,44 @@
-import smtplib
-import ssl
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import logging
+import httpx
 from config import settings
 
 logger = logging.getLogger(__name__)
 
+BREVO_API_URL = "https://api.brevo.com/v3/smtp/email"
+
 
 def send_email(to: str, subject: str, html_body: str) -> bool:
-    """Send email via configured SMTP. Returns True on success."""
-    if not settings.SMTP_USER or not settings.SMTP_PASS:
-        logger.warning(f"SMTP credentials not set, skipping email to {to}")
+    """Send email via Brevo HTTP API. Returns True on success."""
+    if not settings.BREVO_API_KEY:
+        logger.warning(f"BREVO_API_KEY not set, skipping email to {to}")
         return False
 
+    sender_email = settings.BREVO_SENDER_EMAIL or settings.SMTP_FROM_EMAIL
+    if not sender_email:
+        logger.warning(f"BREVO_SENDER_EMAIL not set, skipping email to {to}")
+        return False
+
+    payload = {
+        "sender": {"name": settings.BREVO_SENDER_NAME, "email": sender_email},
+        "to": [{"email": to}],
+        "subject": subject,
+        "htmlContent": html_body,
+    }
+    headers = {
+        "api-key": settings.BREVO_API_KEY,
+        "content-type": "application/json",
+        "accept": "application/json",
+    }
+
     try:
-        from_email = settings.SMTP_FROM_EMAIL or settings.SMTP_USER
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = subject
-        msg["From"] = f"{settings.SMTP_SENDER_NAME} <{from_email}>"
-        msg["To"] = to
-
-        part = MIMEText(html_body, "html")
-        msg.attach(part)
-
-        timeout = 10  # 10 seconds timeout for SMTP operations
-
-        if settings.SMTP_SECURE:
-            logger.info(f"Connecting to SMTP via SSL: {settings.SMTP_HOST}:{settings.SMTP_PORT}")
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL(settings.SMTP_HOST, settings.SMTP_PORT, context=context, timeout=timeout) as server:
-                server.login(settings.SMTP_USER, settings.SMTP_PASS)
-                server.sendmail(from_email, to, msg.as_string())
-        else:
-            logger.info(f"Connecting to SMTP via STARTTLS: {settings.SMTP_HOST}:{settings.SMTP_PORT}")
-            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=timeout) as server:
-                server.starttls()
-                server.login(settings.SMTP_USER, settings.SMTP_PASS)
-                server.sendmail(from_email, to, msg.as_string())
-
-        logger.info(f"Email successfully sent to {to}: {subject}")
-        return True
+        logger.info(f"Sending email via Brevo API to {to}: {subject}")
+        with httpx.Client(timeout=15.0) as client:
+            resp = client.post(BREVO_API_URL, json=payload, headers=headers)
+        if resp.status_code in (200, 201, 202):
+            logger.info(f"Email successfully sent to {to}: {subject} (messageId={resp.json().get('messageId')})")
+            return True
+        logger.error(f"CRITICAL: Brevo API send failed to {to}. Status={resp.status_code} Body={resp.text}")
+        return False
     except Exception as e:
         logger.error(f"CRITICAL: Email send failed to {to}. Error: {str(e)}", exc_info=True)
         return False

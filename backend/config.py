@@ -29,6 +29,10 @@ class Settings(BaseSettings):
     SMTP_SECURE: bool = False
     SMTP_SENDER_NAME: str = "Nexus Exchange"
     SMTP_FROM_EMAIL: str = ""
+
+    BREVO_API_KEY: str = ""
+    BREVO_SENDER_EMAIL: str = ""
+    BREVO_SENDER_NAME: str = "Nexus Exchange"
     CONTACT_TO_EMAIL: str = ""
     SITE_URL: str = "http://localhost:8000"
 
