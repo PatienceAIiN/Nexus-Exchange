@@ -1,17 +1,26 @@
+from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 from config import settings
 
+# libpq/psycopg2 query params that asyncpg does not accept as connect kwargs.
+# SSL is handled separately via connect_args below.
+_INCOMPATIBLE_QUERY_PARAMS = {"sslmode", "channel_binding"}
+
 def _normalize_async_url(url: str) -> str:
-    """Force the asyncpg driver. Hosting providers hand out a bare
-    ``postgresql://`` URL, which SQLAlchemy maps to psycopg2 (not installed)."""
-    if url.startswith("postgresql+asyncpg://"):
-        return url
-    if url.startswith("postgresql://"):
-        return url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    if url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql+asyncpg://", 1)
-    return url
+    """Force the asyncpg driver and drop libpq-only query params.
+
+    Hosting providers hand out a bare ``postgresql://`` URL (which SQLAlchemy
+    maps to psycopg2, not installed) with ``?sslmode=...&channel_binding=...``
+    query params that asyncpg rejects as unexpected keyword arguments."""
+    for prefix in ("postgresql://", "postgres://"):
+        if url.startswith(prefix):
+            url = "postgresql+asyncpg://" + url[len(prefix):]
+            break
+
+    parts = urlsplit(url)
+    kept = [(k, v) for k, v in parse_qsl(parts.query) if k not in _INCOMPATIBLE_QUERY_PARAMS]
+    return urlunsplit(parts._replace(query=urlencode(kept)))
 
 DATABASE_URL = _normalize_async_url(settings.DATABASE_URL)
 
