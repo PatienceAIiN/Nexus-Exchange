@@ -17,7 +17,7 @@ import { filter } from 'rxjs';
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'Xchange Book';
+  title = 'Xchange Verse';
   supportOpen = false;
   showFloatingSupport = false;
   loading = false;
