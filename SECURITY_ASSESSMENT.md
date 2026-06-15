@@ -1,4 +1,4 @@
-# Security & DDoS Readiness Assessment (Nexus Exchange)
+# Security & DDoS Readiness Assessment (Xchange Book)
 
 ## Quick Rating (Financial-Product Perspective)
 

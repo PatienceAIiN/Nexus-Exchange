@@ -12,7 +12,7 @@ import pandas as pd
 from config import settings
 
 router = APIRouter(prefix="/api/rates", tags=["rates"])
-BRAND_TITLE = "Nexus Exchange"
+BRAND_TITLE = "Xchange Book"
 BRAND_COMPANY = "A product of Patience AI"
 BRAND_LINK = "https://patienceai.in"
 
