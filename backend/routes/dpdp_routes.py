@@ -13,7 +13,7 @@ POLICY_VERSION = "1.0"
 POLICY = {
     "version": POLICY_VERSION,
     "title": "Notice under the Digital Personal Data Protection Act, 2023",
-    "data_fiduciary": "Nexus Exchange (operated by PatienceAI)",
+    "data_fiduciary": "Xchange Book (operated by PatienceAI)",
     "contact": "dpo@patienceai.in",
     "purposes": [
         "Authentication and account management",
@@ -34,7 +34,7 @@ POLICY = {
         "Right to nominate",
         "Right to withdraw consent at any time",
     ],
-    "grievance_officer": "Grievance Officer, Nexus Exchange — dpo@patienceai.in",
+    "grievance_officer": "Grievance Officer, Xchange Book — dpo@patienceai.in",
 }
 
 

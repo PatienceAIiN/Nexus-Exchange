@@ -1,12 +1,12 @@
-# Nexus Exchange 🛡️
+# Xchange Book 🛡️
 
 A premium, full-stack Reference Rate Management Platform built for high-performance financial data processing and administrative oversight.
 
-![Nexus Exchange Dashboard](https://api.dicebear.com/8.x/shapes/svg?seed=nexus&backgroundColor=0f172a)
+![Xchange Book Dashboard](https://api.dicebear.com/8.x/shapes/svg?seed=nexus&backgroundColor=0f172a)
 
 ## 🚀 Overview
 
-Nexus Exchange automates the lifecycle of official reference exchange rates — from automated scraping and real-time WebSocket updates to bulk file processing and administrative approval workflows.
+Xchange Book automates the lifecycle of official reference exchange rates — from automated scraping and real-time WebSocket updates to bulk file processing and administrative approval workflows.
 
 ### Key Features:
 - **Real-Time Rates**: Automated scraping of reference rates with instant WebSocket broadcasting to clients.
@@ -44,8 +44,8 @@ Nexus Exchange automates the lifecycle of official reference exchange rates — 
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/PatienceAIiN/Nexus-Exchange.git
-cd Nexus-Exchange
+git clone https://github.com/PatienceAIiN/Xchange-Book.git
+cd Xchange-Book
 ```
 
 ### 2. Backend Setup
@@ -92,7 +92,7 @@ The project is pre-configured for one-click deployment on Render.
 ## 📁 Project Structure
 
 ```text
-Nexus-Exchange/
+Xchange-Book/
 ├── backend/                # FastAPI Application
 │   ├── routes/             # API Endpoints
 │   ├── services/           # Scrapers, Processors, R2
@@ -112,4 +112,4 @@ Nexus-Exchange/
 Proprietary - Developed by [Patience AI](https://patienceai.in).
 
 ---
-*Maintained with ❤️ by the Nexus Team.*
+*Maintained with ❤️ by the Xchange Book Team.*

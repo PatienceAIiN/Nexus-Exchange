@@ -11,7 +11,7 @@ from services.rate_matcher import find_rate, build_rates_lookup, CURRENCY_MAP
 from config import settings
 
 logger = logging.getLogger(__name__)
-PRODUCT_FOOTER_TEXT = "Nexus Exchange | A product of Patience AI | https://patienceai.in"
+PRODUCT_FOOTER_TEXT = "Xchange Book | A product of Patience AI | https://patienceai.in"
 
 
 async def detect_columns_with_ai(columns: list, sample_rows: list) -> dict:
@@ -266,7 +266,7 @@ def _write_xlsx(original_bytes: bytes, df: pd.DataFrame, header_row_idx: int, re
 
         out = BytesIO()
         footer_row = header_ws_row + 1 + len(df) + 2
-        footer_cell = ws.cell(row=footer_row, column=1, value="Nexus Exchange")
+        footer_cell = ws.cell(row=footer_row, column=1, value="Xchange Book")
         footer_cell.font = Font(bold=True, color="FFFFFF")
         footer_cell.fill = PatternFill(start_color="1A2035", end_color="1A2035", fill_type="solid")
         footer_cell.alignment = Alignment(horizontal="left")

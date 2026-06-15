@@ -1,6 +1,6 @@
 {
-  "name": "Nexus Exchange",
-  "short_name": "Nexus",
+  "name": "Xchange Book",
+  "short_name": "Xchange",
   "theme_color": "#00d4aa",
   "background_color": "#0a0e17",
   "display": "standalone",
@@ -8,15 +8,9 @@
   "start_url": "/",
   "icons": [
     {
-      "src": "icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
+      "src": "favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]

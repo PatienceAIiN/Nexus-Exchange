@@ -146,7 +146,7 @@ async def backfill_historical():
     except Exception as e:
         logger.error(f"Historical backfill failed: {e}", exc_info=True)
 
-app = FastAPI(title="Nexus Exchange API", lifespan=lifespan)
+app = FastAPI(title="Xchange Book API", lifespan=lifespan)
 
 allowed_origins = [o.strip() for o in settings.CORS_ALLOWED_ORIGINS.split(",") if o.strip()]
 app.add_middleware(

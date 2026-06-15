@@ -1,21 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title>Xchange Book logo</title>
+  <desc>A neon X and open-book monogram for Xchange Book.</desc>
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="xb-gradient" x1="10%" y1="8%" x2="92%" y2="94%">
       <stop offset="0%" stop-color="#00d4aa"/>
+      <stop offset="52%" stop-color="#38bdf8"/>
       <stop offset="100%" stop-color="#6366f1"/>
     </linearGradient>
-    <filter id="f" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
-      <feOffset dx="0" dy="2" result="offsetblur"/>
-      <feComponentTransfer>
-        <feFuncA type="linear" slope="0.4"/>
-      </feComponentTransfer>
+    <filter id="xb-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.4" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0 0 0 0 0 0.83 0 0 0 0 0.67 0 0 0 0.55 0" result="glow"/>
       <feMerge>
-        <feMergeNode/>
+        <feMergeNode in="glow"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
   <rect width="64" height="64" rx="16" fill="#0a0e17"/>
-  <path d="M 18 46 L 18 18 L 46 46 L 46 18" stroke="url(#g)" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" fill="none" filter="url(#f)"/>
+  <path d="M14 40c7-4 14-4 18 1 4-5 11-5 18-1V18c-7-3-14-2-18 3-4-5-11-6-18-3v22Z" fill="none" stroke="url(#xb-gradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  <path d="M32 21v24" stroke="url(#xb-gradient)" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
+  <path d="M20 18l24 28M44 18 20 46" fill="none" stroke="url(#xb-gradient)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" filter="url(#xb-glow)"/>
 </svg>
