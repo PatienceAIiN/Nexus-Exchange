@@ -1,0 +1,28 @@
+name: Deploy to VM
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+concurrency: { group: deploy-nexus, cancel-in-progress: true }
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - name: Build Angular frontend
+        run: cd frontend && npm ci --no-audit --no-fund && npx ng build
+      - name: SSH setup
+        run: |
+          mkdir -p ~/.ssh && echo "${{ secrets.VM_SSH_KEY }}" > ~/.ssh/k && chmod 600 ~/.ssh/k
+          ssh-keyscan -H ${{ secrets.VM_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+      - name: Deploy backend + built frontend
+        env:
+          H: ${{ secrets.VM_USER }}@${{ secrets.VM_HOST }}
+          D: /home/harsh/products/Nexus-Exchange/backend
+        run: |
+          rsync -az --exclude='.env' --exclude='.venv' --exclude='static' --exclude='__pycache__' \
+            -e "ssh -i ~/.ssh/k" backend/ "$H:$D/"
+          rsync -az --delete -e "ssh -i ~/.ssh/k" frontend/dist/frontend/browser/ "$H:$D/static/browser/"
+          ssh -i ~/.ssh/k "$H" "cd $D && .venv/bin/pip install -q -r requirements.txt && sudo systemctl restart nexus"
