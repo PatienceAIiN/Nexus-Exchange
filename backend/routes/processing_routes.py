@@ -13,7 +13,7 @@ import asyncio
 import json
 import uuid
 import io
-from datetime import datetime
+from datetime import datetime, timedelta, date
 import logging
 
 router = APIRouter(prefix="/api/processing", tags=["processing"])
@@ -21,6 +21,61 @@ logger = logging.getLogger(__name__)
 
 # In-memory task progress store
 task_progress: dict = {}
+
+
+async def _backfill_missing_rates(db: AsyncSession, unmatched_dates: list) -> int:
+    """Auto-heal: when an uploaded file references dates that have no FBIL rate
+    in the DB, fetch that date range straight from FBIL and seed it. Returns the
+    number of rows added. This only reads from FBIL and inserts new rows — it
+    never touches the matching logic or existing rows."""
+    from services.fbil_scraper import fetch_fbil_rates
+
+    parsed = []
+    for s in unmatched_dates:
+        try:
+            parsed.append(datetime.strptime(str(s)[:10], "%Y-%m-%d").date())
+        except Exception:
+            continue
+    if not parsed:
+        return 0
+
+    fbil_start = date(2018, 7, 10)          # FBIL publishes nothing before this
+    today = datetime.utcnow().date()
+    fetch_from = max(min(parsed) - timedelta(days=10), fbil_start)  # pad for holiday look-back
+    fetch_to = min(max(parsed), today)
+    if fetch_from > fetch_to:
+        return 0
+
+    # Existing (date, pair) keys in range → never double-insert
+    res = await db.execute(
+        select(FBILRate.date, FBILRate.currency_pair).where(
+            and_(FBILRate.date >= fetch_from, FBILRate.date <= fetch_to)
+        )
+    )
+    existing = {(r[0], r[1]) for r in res.all()}
+
+    added = 0
+    cur = fetch_from
+    while cur <= fetch_to:                    # FBIL likes <=90-day windows
+        chunk_end = min(cur + timedelta(days=90), fetch_to)
+        rows = await fetch_fbil_rates(cur, chunk_end)
+        for r in rows:
+            key = (r["date"], r["currency_pair"])
+            if key in existing:
+                continue
+            db.add(FBILRate(
+                date=r["date"], time=r.get("time"),
+                currency_pair=r["currency_pair"], rate=r["rate"],
+                comments=r.get("comments"),
+            ))
+            existing.add(key)
+            added += 1
+        cur = chunk_end + timedelta(days=1)
+
+    if added:
+        await db.commit()
+    logger.info(f"Auto-backfill: added {added} FBIL rates for {fetch_from}..{fetch_to}")
+    return added
 
 @router.post("/upload")
 async def upload_file(
@@ -57,6 +112,22 @@ async def upload_file(
             file_bytes, file.filename, rates_rows, update_progress
         )
 
+        # Auto-heal: if any dates had no FBIL rate in the DB, fetch that range
+        # from FBIL, seed it, and reprocess ONCE. Wrapped so any failure (FBIL
+        # down, etc.) silently keeps the original first-pass result unchanged.
+        auto_seeded = 0
+        if stats.get("unmatched_rows", 0) > 0 and stats.get("unmatched_dates"):
+            try:
+                auto_seeded = await _backfill_missing_rates(db, stats["unmatched_dates"])
+                if auto_seeded > 0:
+                    res2 = await db.execute(select(FBILRate))
+                    rates_rows = res2.scalars().all()
+                    processed_bytes, stats = await process_expense_file(
+                        file_bytes, file.filename, rates_rows, update_progress
+                    )
+            except Exception as e:
+                logger.warning(f"Auto-backfill skipped (kept original result): {e}")
+
         # Upload processed file to R2
         processed_filename = f"processed_{file.filename}"
         processed_key = f"processed/{current_user.id}/{timestamp}_{processed_filename}"
@@ -87,7 +158,10 @@ async def upload_file(
 
         return {
             "done": True,
-            "message": f"Done! {stats['matched_rows']}/{stats['total_rows']} rows matched.",
+            "message": (
+                f"Done! {stats['matched_rows']}/{stats['total_rows']} rows matched."
+                + (f" Auto-fetched {auto_seeded} missing FBIL rates." if auto_seeded else "")
+            ),
             "stats": stats,
             "file_id": record.id,
             "download_url": download_url
