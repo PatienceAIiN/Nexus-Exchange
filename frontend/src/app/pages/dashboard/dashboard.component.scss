@@ -345,6 +345,83 @@
   display: flex;
   gap: 12px;
   justify-content: center;
+
+  // Keep the Process button a fixed size so it does NOT grow/shrink when its
+  // label switches between "⚡ Process File" and "⚡ 88% Processing...".
+  .btn-primary {
+    min-width: 210px;
+    height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    box-sizing: border-box;
+
+    .btn-text {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+    }
+    // absolute progress fill must not affect button box
+    .progress-fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.18);
+      pointer-events: none;
+    }
+  }
+}
+
+// Sample files block inside the File Upload Guide ("i") modal
+.sample-files {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sample-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+  background: var(--card-bg, rgba(255, 255, 255, 0.02));
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  }
+
+  .sample-badge {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    white-space: nowrap;
+    &.upload { background: rgba(11, 110, 79, 0.14); color: #0B6E4F; }
+    &.result { background: rgba(37, 99, 235, 0.14); color: #2563EB; }
+  }
+  .sample-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+    strong { font-size: 13.5px; }
+    small { color: var(--text-secondary); font-size: 12px; }
+  }
+  .sample-dl {
+    font-size: 18px;
+    color: var(--accent-primary);
+    flex-shrink: 0;
+  }
 }
 
 .stages {

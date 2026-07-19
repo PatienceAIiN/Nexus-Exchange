@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, BackgroundTasks, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, and_
@@ -6,7 +6,7 @@ from database import get_db
 from models import FBILRate, ProcessedFile, User
 from auth import get_current_user
 from config import settings
-from services.file_processor import process_expense_file
+from services.file_processor import process_expense_file, convert_processed
 from services import r2_storage
 from sse_starlette.sse import EventSourceResponse
 import asyncio
@@ -145,6 +145,7 @@ async def get_history(
 @router.get("/download/{file_id}")
 async def download_processed(
     file_id: int,
+    format: str = Query(default="", description="Download format: xlsx | csv | pdf"),
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -160,20 +161,22 @@ async def download_processed(
     if not record.r2_processed_key:
         raise HTTPException(status_code=404, detail="Processed file not available")
 
+    fmt = (format or "").strip().lower()
+    if fmt and fmt not in ("xlsx", "csv", "pdf", "excel"):
+        raise HTTPException(status_code=400, detail="Unsupported format. Use xlsx, csv or pdf.")
+
     try:
         file_bytes = r2_storage.download_file(record.r2_processed_key)
-        ext = record.processed_filename.split(".")[-1].lower()
-        media_types = {
-            "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "csv": "text/csv",
-        }
-        media_type = media_types.get(ext, "application/octet-stream")
+        out_bytes, media_type, ext = convert_processed(file_bytes, record.processed_filename, fmt)
+        base = (record.original_filename or record.processed_filename or "processed").rsplit(".", 1)[0]
+        out_name = f"{base}_processed.{ext}"
         return StreamingResponse(
-            io.BytesIO(file_bytes),
+            io.BytesIO(out_bytes),
             media_type=media_type,
-            headers={"Content-Disposition": f'attachment; filename="{record.processed_filename}"'},
+            headers={"Content-Disposition": f'attachment; filename="{out_name}"'},
         )
     except Exception as e:
+        logger.error(f"Download/convert failed for file {file_id} fmt={fmt}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
 
 @router.delete("/file/{file_id}")

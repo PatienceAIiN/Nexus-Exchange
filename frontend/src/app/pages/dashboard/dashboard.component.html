@@ -280,6 +280,35 @@
   </div>
 }
 
+<!-- PROCESSED FILE DOWNLOAD FORMAT MODAL (xlsx / csv / pdf) -->
+@if (showFormatModal) {
+  <div class="modal-backdrop" (click)="showFormatModal=false">
+    <div class="modal download-modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" type="button" (click)="showFormatModal=false">✕</button>
+      <div class="modal-kicker">Export processed file</div>
+      <h2>Choose download format</h2>
+      <p class="text-secondary mt-8">Your processed file — with FBIL reference rates filled in — in whichever format you need.</p>
+      <div class="format-grid mt-24">
+        <button class="format-card" type="button" (click)="downloadInFormat('xlsx')" [disabled]="!!downloadingFmt">
+          @if (downloadingFmt==='xlsx') { <span class="spinner"></span> } @else { <span class="format-icon">XLS</span> }
+          <strong>Excel Workbook</strong>
+          <small>Formatted .xlsx spreadsheet</small>
+        </button>
+        <button class="format-card" type="button" (click)="downloadInFormat('csv')" [disabled]="!!downloadingFmt">
+          @if (downloadingFmt==='csv') { <span class="spinner"></span> } @else { <span class="format-icon">CSV</span> }
+          <strong>CSV File</strong>
+          <small>Spreadsheet-friendly raw data</small>
+        </button>
+        <button class="format-card" type="button" (click)="downloadInFormat('pdf')" [disabled]="!!downloadingFmt">
+          @if (downloadingFmt==='pdf') { <span class="spinner"></span> } @else { <span class="format-icon">PDF</span> }
+          <strong>PDF Report</strong>
+          <small>Shareable snapshot report</small>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
 <!-- FILE FORMAT GUIDE MODAL -->
 @if (showFileGuideModal) {
   <div class="modal-backdrop" (click)="showFileGuideModal=false">
@@ -319,8 +348,39 @@
         <ul>
           <li>Matched rows are populated with reference rates.</li>
           <li>A processing summary with total, matched, and unmatched rows.</li>
-          <li>A downloadable processed file from the result/history section.</li>
+          <li>A downloadable processed file (xlsx, csv or pdf) from the result/history section.</li>
         </ul>
+      </div>
+
+      <div class="guide-section mt-16">
+        <h4>📎 Sample files</h4>
+        <p class="text-secondary" style="margin:4px 0 12px;font-size:13px">Download a ready-made example to see exactly what to upload and what you'll get back.</p>
+        <div class="sample-files">
+          <a class="sample-file" href="/samples/sample-input.xlsx" download="sample-input.xlsx">
+            <span class="sample-badge upload">Upload me</span>
+            <span class="sample-meta">
+              <strong>Sample input template</strong>
+              <small>Excel (.xlsx) — the format to upload</small>
+            </span>
+            <span class="sample-dl">⬇</span>
+          </a>
+          <a class="sample-file" href="/samples/sample-input.csv" download="sample-input.csv">
+            <span class="sample-badge upload">Upload me</span>
+            <span class="sample-meta">
+              <strong>Sample input template</strong>
+              <small>CSV (.csv) — same template, CSV form</small>
+            </span>
+            <span class="sample-dl">⬇</span>
+          </a>
+          <a class="sample-file" href="/samples/sample-processed.xlsx" download="sample-processed.xlsx">
+            <span class="sample-badge result">You get</span>
+            <span class="sample-meta">
+              <strong>Sample processed result</strong>
+              <small>Excel (.xlsx) — with Ref Rate filled in</small>
+            </span>
+            <span class="sample-dl">⬇</span>
+          </a>
+        </div>
       </div>
 
       <div class="modal-actions mt-24">
@@ -372,8 +432,8 @@
                   <td><span class="success-text">{{ f.matched_rows }}</span></td>
                   <td><span class="badge {{ f.status === 'completed' ? 'approved' : 'pending' }}">{{ f.status }}</span></td>
                   <td>
-                    <button class="btn btn-ghost" style="padding:6px 12px;font-size:12px" (click)="downloadHistoryFile(f)" [disabled]="downloadingFileId===f.id">
-                      @if (downloadingFileId===f.id) { <span class="spinner"></span> } @else { ⬇ }
+                    <button class="btn btn-ghost download-icon-btn" style="padding:6px 12px;font-size:12px" (click)="downloadHistoryFile(f)" title="Download as xlsx, csv or pdf" [disabled]="f.status !== 'completed'">
+                      ⬇
                     </button>
                   </td>
                   <td>

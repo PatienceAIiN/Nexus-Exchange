@@ -480,17 +480,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
     requestAnimationFrame(step);
   }
 
-  downloadResult(): void {
-    if (!this.processResult?.file_id) return;
-    this.proc.downloadFile(this.processResult.file_id).subscribe({
+  // ── Processed-file download in a chosen format (xlsx / csv / pdf) ──────────
+  showFormatModal = false;
+  formatTargetId: number | null = null;
+  formatTargetBase = 'processed_file';
+  downloadingFmt = '';
+
+  private baseName(name: string | undefined | null): string {
+    return (name || 'processed_file').replace(/\.(xlsx|csv)$/i, '').trim() || 'processed_file';
+  }
+
+  openFormatPicker(fileId: number, sourceName: string | undefined | null): void {
+    this.formatTargetId = fileId;
+    this.formatTargetBase = this.baseName(sourceName);
+    this.downloadingFmt = '';
+    this.showFormatModal = true;
+  }
+
+  downloadInFormat(format: 'xlsx' | 'csv' | 'pdf'): void {
+    if (this.formatTargetId == null || this.downloadingFmt) return;
+    this.downloadingFmt = format;
+    this.proc.downloadFile(this.formatTargetId, format).subscribe({
       next: (blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; a.download = `processed_file.xlsx`; a.click();
+        a.href = url; a.download = `${this.formatTargetBase}_processed.${format}`; a.click();
         URL.revokeObjectURL(url);
+        this.downloadingFmt = '';
+        this.showFormatModal = false;
+        this.toastSvc.success(`Downloaded ${format.toUpperCase()} file`);
       },
-      error: () => this.toastSvc.error('Download failed')
+      error: () => { this.downloadingFmt = ''; this.toastSvc.error('Download failed'); }
     });
+  }
+
+  downloadResult(): void {
+    if (!this.processResult?.file_id) return;
+    this.openFormatPicker(this.processResult.file_id, this.selectedFile?.name);
   }
 
   openHistory(): void {
@@ -503,17 +529,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   downloadHistoryFile(file: ProcessedFile): void {
-    this.downloadingFileId = file.id;
-    this.proc.downloadFile(file.id).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = file.processed_filename; a.click();
-        URL.revokeObjectURL(url);
-        this.downloadingFileId = null;
-      },
-      error: () => { this.downloadingFileId = null; this.toastSvc.error('Download failed'); }
-    });
+    this.openFormatPicker(file.id, file.original_filename || file.processed_filename);
   }
 
   confirmDeleteFile(file: ProcessedFile): void {

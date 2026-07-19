@@ -22,8 +22,9 @@ export class ProcessingService {
     return this.http.get<ProcessedFile[]>('/api/processing/history');
   }
 
-  downloadFile(fileId: number): Observable<Blob> {
-    return this.http.get(`/api/processing/download/${fileId}`, { responseType: 'blob' });
+  downloadFile(fileId: number, format: string = ''): Observable<Blob> {
+    const query = format ? `?format=${encodeURIComponent(format)}` : '';
+    return this.http.get(`/api/processing/download/${fileId}${query}`, { responseType: 'blob' });
   }
 
   deleteFile(fileId: number): Observable<any> {
