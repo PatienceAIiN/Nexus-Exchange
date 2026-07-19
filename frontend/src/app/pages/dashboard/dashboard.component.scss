@@ -341,6 +341,12 @@
   }
 }
 
+// Format picker must stack ABOVE the history modal (both use z-index:1000),
+// otherwise opening it from history renders it hidden behind that modal.
+.format-picker-backdrop {
+  z-index: 1100;
+}
+
 .upload-actions {
   display: flex;
   gap: 12px;

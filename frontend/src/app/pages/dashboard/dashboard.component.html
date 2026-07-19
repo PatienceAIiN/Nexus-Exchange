@@ -282,7 +282,7 @@
 
 <!-- PROCESSED FILE DOWNLOAD FORMAT MODAL (xlsx / csv / pdf) -->
 @if (showFormatModal) {
-  <div class="modal-backdrop" (click)="showFormatModal=false">
+  <div class="modal-backdrop format-picker-backdrop" (click)="showFormatModal=false">
     <div class="modal download-modal" (click)="$event.stopPropagation()">
       <button class="modal-close" type="button" (click)="showFormatModal=false">✕</button>
       <div class="modal-kicker">Export processed file</div>

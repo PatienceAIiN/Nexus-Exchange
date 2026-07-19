@@ -65,6 +65,17 @@ def _read_csv_robust(file_bytes: bytes, header):
     return body.reset_index(drop=True)
 
 
+def _detect_header_row(df_raw: pd.DataFrame) -> int:
+    """The first row with >=3 non-empty string cells is the header. Real-world
+    files often carry a title/blank row above it — skipping to this row is what
+    keeps columns named correctly instead of 'Unnamed: N'."""
+    for i, row in df_raw.iterrows():
+        cells = [str(v).strip() for v in row.dropna() if str(v).strip()]
+        if len(cells) >= 3:
+            return int(i)
+    return 0
+
+
 async def detect_columns_with_ai(columns: list, sample_rows: list) -> dict:
     prompt = f"""Given these spreadsheet columns and sample data, identify:
 - date_col: column containing transaction/expense date
@@ -162,13 +173,7 @@ async def process_expense_file(
     else:
         df_raw = _read_csv_robust(file_bytes, header=None)
 
-    header_row_idx = 0
-    for i, row in df_raw.iterrows():
-        non_null = row.dropna()
-        str_cells = [str(v).strip() for v in non_null if str(v).strip()]
-        if len(str_cells) >= 3:
-            header_row_idx = int(i)
-            break
+    header_row_idx = _detect_header_row(df_raw)
 
     logger.info(f"Detected header at row {header_row_idx}")
 
@@ -345,17 +350,40 @@ def _write_xlsx(original_bytes: bytes, df: pd.DataFrame, header_row_idx: int, re
 # bytes untouched (preserves the xlsx formatting/footer); other formats convert.
 # ──────────────────────────────────────────────────────────────────────────────
 def _processed_to_df(file_bytes: bytes, stored_filename: str) -> pd.DataFrame:
+    # Read raw (no header) first, detect the real header row — the processed
+    # xlsx keeps any title/blank rows the original had above the header, so a
+    # naive header=0 read would label every column "Unnamed: N".
     if stored_filename.lower().endswith(".xlsx"):
-        df = pd.read_excel(BytesIO(file_bytes))
+        raw = pd.read_excel(BytesIO(file_bytes), header=None)
+        hdr = _detect_header_row(raw)
+        df = pd.read_excel(BytesIO(file_bytes), header=hdr)
     else:
-        df = _read_csv_robust(file_bytes, header=0)
-    # Strip the trailing branded footer / empty rows added at write time
+        raw = _read_csv_robust(file_bytes, header=None)
+        hdr = _detect_header_row(raw)
+        df = _read_csv_robust(file_bytes, header=hdr)
+
+    df.columns = [str(c).strip() for c in df.columns]
+
+    # Strip trailing branded footer / fully-empty rows added at write time
     df = df.dropna(how="all")
     footer_mask = df.apply(
         lambda r: r.astype(str).str.contains("Xchange Book|Patience AI|patienceai.in", case=False, na=False).any(),
         axis=1,
     )
     df = df[~footer_mask].reset_index(drop=True)
+
+    # Drop columns that have no header AND no data (e.g. a blank leading column
+    # that pandas names "Unnamed: 0"); blank the header of unnamed-but-populated
+    # columns so the export never shows "Unnamed: N".
+    keep, rename = [], {}
+    for c in df.columns:
+        is_unnamed = str(c).startswith("Unnamed") or str(c).strip() == "" or str(c).lower() == "nan"
+        if is_unnamed and df[c].isna().all():
+            continue
+        keep.append(c)
+        if is_unnamed:
+            rename[c] = ""
+    df = df[keep].rename(columns=rename)
     return df
 
 
