@@ -46,30 +46,30 @@ async def _backfill_missing_rates(db: AsyncSession, unmatched_dates: list) -> in
     if fetch_from > fetch_to:
         return 0
 
-    # Existing (date, pair) keys in range → never double-insert
-    res = await db.execute(
-        select(FBILRate.date, FBILRate.currency_pair).where(
-            and_(FBILRate.date >= fetch_from, FBILRate.date <= fetch_to)
-        )
-    )
-    existing = {(r[0], r[1]) for r in res.all()}
-
     added = 0
     cur = fetch_from
     while cur <= fetch_to:                    # FBIL likes <=90-day windows
         chunk_end = min(cur + timedelta(days=90), fetch_to)
         rows = await fetch_fbil_rates(cur, chunk_end)
-        for r in rows:
-            key = (r["date"], r["currency_pair"])
-            if key in existing:
-                continue
-            db.add(FBILRate(
-                date=r["date"], time=r.get("time"),
-                currency_pair=r["currency_pair"], rate=r["rate"],
-                comments=r.get("comments"),
-            ))
-            existing.add(key)
-            added += 1
+        if rows:
+            # Dedup against the ACTUAL dates FBIL returned so an out-of-window
+            # row can never create a duplicate.
+            cand_dates = {r["date"] for r in rows}
+            ex = await db.execute(
+                select(FBILRate.date, FBILRate.currency_pair).where(FBILRate.date.in_(cand_dates))
+            )
+            have = {(x[0], x[1]) for x in ex.all()}
+            for r in rows:
+                key = (r["date"], r["currency_pair"])
+                if key in have:
+                    continue
+                db.add(FBILRate(
+                    date=r["date"], time=r.get("time"),
+                    currency_pair=r["currency_pair"], rate=r["rate"],
+                    comments=r.get("comments"),
+                ))
+                have.add(key)
+                added += 1
         cur = chunk_end + timedelta(days=1)
 
     if added:

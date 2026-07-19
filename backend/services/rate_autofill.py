@@ -70,11 +70,6 @@ async def fill_missing_range(db: AsyncSession, from_date: date, to_date: date) -
             continue
         _attempted.add(key)
 
-        r2 = await db.execute(
-            select(FBILRate.date, FBILRate.currency_pair).where(and_(FBILRate.date >= a, FBILRate.date <= b))
-        )
-        existing = {(x[0], x[1]) for x in r2.all()}
-
         cur = a
         while cur <= b:
             chunk_end = min(cur + timedelta(days=90), b)
@@ -83,17 +78,25 @@ async def fill_missing_range(db: AsyncSession, from_date: date, to_date: date) -
             except Exception as e:
                 logger.warning(f"rate autofill fetch failed {cur}..{chunk_end}: {e}")
                 rows, fbil_reached = [], False
-            for row in rows:
-                k = (row["date"], row["currency_pair"])
-                if k in existing:
-                    continue
-                db.add(FBILRate(
-                    date=row["date"], time=row.get("time"),
-                    currency_pair=row["currency_pair"], rate=row["rate"],
-                    comments=row.get("comments"),
-                ))
-                existing.add(k)
-                added += 1
+            if rows:
+                # Dedup against the ACTUAL dates FBIL returned (not the requested
+                # window) so an out-of-window row can never create a duplicate.
+                cand_dates = {row["date"] for row in rows}
+                ex = await db.execute(
+                    select(FBILRate.date, FBILRate.currency_pair).where(FBILRate.date.in_(cand_dates))
+                )
+                have = {(x[0], x[1]) for x in ex.all()}
+                for row in rows:
+                    k = (row["date"], row["currency_pair"])
+                    if k in have:
+                        continue
+                    db.add(FBILRate(
+                        date=row["date"], time=row.get("time"),
+                        currency_pair=row["currency_pair"], rate=row["rate"],
+                        comments=row.get("comments"),
+                    ))
+                    have.add(k)
+                    added += 1
             cur = chunk_end + timedelta(days=1)
 
     if added:
