@@ -30,6 +30,8 @@ export interface RatesResponse {
   page: number;
   per_page: number;
   pages: number;
+  auto_seeded?: number;
+  notice?: string;
 }
 
 export interface ProcessedFile {

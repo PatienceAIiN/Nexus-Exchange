@@ -306,6 +306,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.ratesPage = res.page;
         this.ratesTotalPages = Math.max(res.pages, 1);
         this.ratesLoading = false;
+        // Auto-heal feedback: rates missing for the viewed range are fetched from
+        // FBIL automatically — tell the user in plain language when it happened.
+        if (res.auto_seeded && res.auto_seeded > 0) {
+          this.toastSvc.success(res.notice || `Fetched ${res.auto_seeded} missing rates from FBIL`);
+        } else if (res.total === 0 && res.notice) {
+          this.toastSvc.info(res.notice);
+        }
       },
       error: () => { this.ratesLoading = false; this.toastSvc.error('Failed to load rates'); }
     });

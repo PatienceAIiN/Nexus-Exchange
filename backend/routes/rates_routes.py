@@ -38,6 +38,19 @@ async def get_rates(
     if not to_date:
         to_date = date.today()
 
+    # Auto-heal on display: if the viewed range has a sizable hole in the DB,
+    # fetch+seed it from FBIL before returning (page 1 only, so paging doesn't
+    # re-trigger). Never blocks the response — any failure just shows what's there.
+    auto_seeded, notice = 0, ""
+    if page == 1:
+        try:
+            from services.rate_autofill import fill_missing_range
+            fill = await fill_missing_range(db, from_date, to_date)
+            auto_seeded, notice = fill.get("added", 0), fill.get("notice", "")
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"rate autofill skipped: {e}")
+
     conditions = [FBILRate.date >= from_date, FBILRate.date <= to_date]
     if currency_pair and currency_pair != "all":
         conditions.append(FBILRate.currency_pair == currency_pair)
@@ -65,6 +78,8 @@ async def get_rates(
         "page": page,
         "per_page": per_page,
         "pages": (total + per_page - 1) // per_page,
+        "auto_seeded": auto_seeded,
+        "notice": notice,
     }
 
 @router.get("/latest")
