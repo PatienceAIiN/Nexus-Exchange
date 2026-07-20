@@ -203,7 +203,8 @@ async def user_processed_files(
                 "unmatched_rows": f.unmatched_rows,
                 "status": f.status,
                 "created_at": str(f.created_at),
-                "downloadable": bool(f.r2_processed_key),
+                "is_deleted": bool(f.is_deleted),
+                "downloadable": bool(f.r2_processed_key) and not f.is_deleted,
             }
             for f in files
         ],

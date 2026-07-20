@@ -193,10 +193,14 @@
             @for (f of userFiles; track f.id) {
               <div class="admin-file-row">
                 <div class="admin-file-meta">
-                  <strong>{{ f.original_filename }}</strong>
+                  <strong>
+                    {{ f.original_filename }}
+                    @if (f.is_deleted) { <span class="deleted-tag">deleted</span> }
+                  </strong>
                   <small>{{ f.created_at | slice:0:10 }} · {{ f.matched_rows }}/{{ f.total_rows }} matched · {{ f.status }}</small>
                 </div>
-                <button class="btn btn-outline admin-file-dl" title="Download processed file"
+                <button class="btn btn-outline admin-file-dl"
+                  [title]="f.is_deleted ? 'File removed by user — record kept' : 'Download processed file'"
                   [disabled]="!f.downloadable || downloadingFileId===f.id" (click)="downloadUserFile(f)">
                   @if (downloadingFileId===f.id) { <span class="spinner"></span> } @else { ⬇ }
                 </button>

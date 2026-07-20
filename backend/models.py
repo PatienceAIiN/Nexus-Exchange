@@ -49,6 +49,9 @@ class ProcessedFile(Base):
     status = Column(String(50), default="processing")
     processing_log = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    # Soft delete: when a user removes a file from history we drop the stored
+    # bytes (R2) but keep the row so the "files processed" count is preserved.
+    is_deleted = Column(Boolean, default=False, nullable=False)
 
 
 class DPDPConsent(Base):

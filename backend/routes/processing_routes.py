@@ -197,7 +197,7 @@ async def get_history(
 ):
     result = await db.execute(
         select(ProcessedFile)
-        .where(ProcessedFile.user_id == current_user.id)
+        .where(and_(ProcessedFile.user_id == current_user.id, ProcessedFile.is_deleted == False))
         .order_by(ProcessedFile.created_at.desc())
     )
     files = result.scalars().all()
@@ -268,6 +268,9 @@ async def delete_processed_file(
     if not record:
         raise HTTPException(status_code=404, detail="File not found")
 
+    # Soft delete: remove the stored files (R2) but keep the row so the user's
+    # "files processed" count is preserved for the admin. Records are never
+    # auto-deleted — only on this explicit user action.
     try:
         if record.r2_original_key:
             r2_storage.delete_file(record.r2_original_key)
@@ -280,7 +283,9 @@ async def delete_processed_file(
     except Exception as e:
         logger.warning(f"Failed to delete processed file from R2: {e}")
 
-    await db.delete(record)
+    record.is_deleted = True
+    record.r2_original_key = None
+    record.r2_processed_key = None
     await db.commit()
     return {"message": "File deleted successfully"}
 
@@ -313,7 +318,10 @@ async def bulk_delete_processed_files(
             if record.r2_processed_key:
                 r2_storage.delete_file(record.r2_processed_key)
         except: pass
-        await db.delete(record)
-        
+        # Soft delete — keep the row for the count, drop the stored bytes
+        record.is_deleted = True
+        record.r2_original_key = None
+        record.r2_processed_key = None
+
     await db.commit()
     return {"message": f"{len(records)} files deleted successfully"}
