@@ -22,6 +22,6 @@ export class ThemeService {
   }
 
   private getSaved(): 'dark' | 'light' {
-    return (localStorage.getItem(this.KEY) as 'dark' | 'light') || 'dark';
+    return (localStorage.getItem(this.KEY) as 'dark' | 'light') || 'light';
   }
 }

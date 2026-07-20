@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database import get_db
-from models import User, SignupStatus, UserRole
+from models import User, SignupStatus, UserRole, ProcessedFile
 from schemas import UserResponse
 from auth import get_current_admin, get_password_hash
 from typing import List, Optional
 from pydantic import BaseModel
+import io
 import logging
 
 logger = logging.getLogger(__name__)
@@ -167,6 +169,82 @@ async def get_stats(db: AsyncSession = Depends(get_db), _=Depends(get_current_ad
         "total_rates": total_rates,
         "total_processed_files": total_files,
     }
+
+
+@router.get("/users/{user_id}/files")
+async def user_processed_files(
+    user_id: int,
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+    """List every file processed by a specific user (admin view)."""
+    ures = await db.execute(select(User).where(User.id == user_id))
+    user = ures.scalar_one_or_none()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    res = await db.execute(
+        select(ProcessedFile)
+        .where(ProcessedFile.user_id == user_id)
+        .order_by(ProcessedFile.created_at.desc())
+    )
+    files = res.scalars().all()
+    return {
+        "user_id": user_id,
+        "username": user.username,
+        "count": len(files),
+        "files": [
+            {
+                "id": f.id,
+                "original_filename": f.original_filename,
+                "processed_filename": f.processed_filename,
+                "total_rows": f.total_rows,
+                "matched_rows": f.matched_rows,
+                "unmatched_rows": f.unmatched_rows,
+                "status": f.status,
+                "created_at": str(f.created_at),
+                "downloadable": bool(f.r2_processed_key),
+            }
+            for f in files
+        ],
+    }
+
+
+@router.get("/files/{file_id}/download")
+async def admin_download_file(
+    file_id: int,
+    format: str = Query(default="", description="xlsx | csv | pdf"),
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+    """Admin download of any user's processed file (defaults to stored format)."""
+    from services import r2_storage
+    from services.file_processor import convert_processed
+
+    res = await db.execute(select(ProcessedFile).where(ProcessedFile.id == file_id))
+    record = res.scalar_one_or_none()
+    if not record:
+        raise HTTPException(status_code=404, detail="File not found")
+    if not record.r2_processed_key:
+        raise HTTPException(status_code=404, detail="Processed file not available")
+
+    fmt = (format or "").strip().lower()
+    if fmt and fmt not in ("xlsx", "csv", "pdf", "excel"):
+        raise HTTPException(status_code=400, detail="Unsupported format. Use xlsx, csv or pdf.")
+
+    try:
+        file_bytes = r2_storage.download_file(record.r2_processed_key)
+        out_bytes, media_type, ext = convert_processed(file_bytes, record.processed_filename, fmt)
+        base = (record.original_filename or record.processed_filename or "processed").rsplit(".", 1)[0]
+        out_name = f"{base}_processed.{ext}"
+        return StreamingResponse(
+            io.BytesIO(out_bytes),
+            media_type=media_type,
+            headers={"Content-Disposition": f'attachment; filename="{out_name}"'},
+        )
+    except Exception as e:
+        logger.error(f"Admin download failed for file {file_id} fmt={fmt}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Download failed: {str(e)}")
 
 
 def _send_approval_email(username: str, email: str):

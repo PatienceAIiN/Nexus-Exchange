@@ -178,6 +178,34 @@
         <p><strong>Active:</strong> {{ viewingUser.is_active ? 'Yes' : 'No' }}</p>
         <p><strong>Registered:</strong> {{ viewingUser.created_at | slice:0:10 }}</p>
       </div>
+
+      <div class="mt-24">
+        <h4 class="files-heading">
+          📄 Files processed
+          <span class="count-badge">{{ userFilesLoading ? '…' : userFilesCount }}</span>
+        </h4>
+        @if (userFilesLoading) {
+          <div class="loading-state" style="padding:16px"><span class="spinner"></span></div>
+        } @else if (userFiles.length === 0) {
+          <p class="text-secondary" style="margin-top:8px">This user hasn't processed any files yet.</p>
+        } @else {
+          <div class="admin-files-list mt-8">
+            @for (f of userFiles; track f.id) {
+              <div class="admin-file-row">
+                <div class="admin-file-meta">
+                  <strong>{{ f.original_filename }}</strong>
+                  <small>{{ f.created_at | slice:0:10 }} · {{ f.matched_rows }}/{{ f.total_rows }} matched · {{ f.status }}</small>
+                </div>
+                <button class="btn btn-outline admin-file-dl" title="Download processed file"
+                  [disabled]="!f.downloadable || downloadingFileId===f.id" (click)="downloadUserFile(f)">
+                  @if (downloadingFileId===f.id) { <span class="spinner"></span> } @else { ⬇ }
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
       <div class="modal-actions mt-24">
         <button class="btn btn-ghost" (click)="viewingUser=null">Close</button>
       </div>

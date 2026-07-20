@@ -32,6 +32,10 @@ export class AdminComponent implements OnInit {
   editStatus = '';
   showProfile = false;
   viewingUser: any = null;
+  userFiles: any[] = [];
+  userFilesCount = 0;
+  userFilesLoading = false;
+  downloadingFileId: number | null = null;
 
   constructor(
     private http: HttpClient,
@@ -122,6 +126,35 @@ export class AdminComponent implements OnInit {
 
   openView(user: any): void {
     this.viewingUser = user;
+    this.userFiles = [];
+    this.userFilesCount = 0;
+    this.userFilesLoading = true;
+    this.http.get<any>(`/api/admin/users/${user.id}/files`).subscribe({
+      next: (res) => {
+        this.userFiles = res.files || [];
+        this.userFilesCount = res.count || 0;
+        this.userFilesLoading = false;
+      },
+      error: () => { this.userFilesLoading = false; this.toast.error('Failed to load user files'); }
+    });
+  }
+
+  downloadUserFile(file: any): void {
+    if (!file.downloadable || this.downloadingFileId === file.id) return;
+    this.downloadingFileId = file.id;
+    this.http.get(`/api/admin/files/${file.id}/download`, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const base = (file.original_filename || 'processed').replace(/\.(xlsx|csv)$/i, '');
+        a.href = url;
+        a.download = file.processed_filename || `${base}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.downloadingFileId = null;
+      },
+      error: () => { this.downloadingFileId = null; this.toast.error('Download failed'); }
+    });
   }
 
   deleteUser(id: number): void {
