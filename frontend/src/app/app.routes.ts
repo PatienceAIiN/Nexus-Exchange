@@ -34,5 +34,10 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/admin/admin.component').then(m => m.AdminComponent),
     canActivate: [adminGuard],
   },
+  {
+    path: 'legal/:doc',
+    title: 'Legal · Xchange Verse',
+    loadComponent: () => import('./pages/legal/legal.component').then(m => m.LegalComponent),
+  },
   { path: '**', redirectTo: '/' },
 ];

@@ -1,0 +1,203 @@
+<div class="legal-page">
+  <header class="legal-header">
+    <a routerLink="/" class="legal-brand gradient-text">Xchange Verse</a>
+    <nav class="legal-tabs">
+      <a routerLink="/legal/terms" [class.active]="doc==='terms'">Terms</a>
+      <a routerLink="/legal/privacy" [class.active]="doc==='privacy'">Privacy</a>
+      <a routerLink="/legal/data" [class.active]="doc==='data'">Data Collection</a>
+    </nav>
+  </header>
+
+  <main class="legal-body">
+    @switch (doc) {
+
+      <!-- ─────────────── TERMS OF SERVICE ─────────────── -->
+      @case ('terms') {
+        <h1>Terms of Service</h1>
+        <p class="legal-updated">Last updated: {{ updated }}</p>
+
+        <section>
+          <h2>1. Acceptance of terms</h2>
+          <p>Xchange Verse ("the Platform", "we", "us"), a product of Patience AI, provides reference-rate management and expense-file processing services. By creating an account or using the Platform, you agree to these Terms. If you do not agree, do not use the Platform.</p>
+        </section>
+
+        <section>
+          <h2>2. What the Platform does</h2>
+          <p>The Platform displays foreign-exchange reference rates published by Financial Benchmarks India Pvt. Ltd. (FBIL) and lets approved users upload spreadsheet files (.xlsx / .csv) to have FBIL reference rates matched and filled in. Processed files can be downloaded in Excel, CSV or PDF formats.</p>
+        </section>
+
+        <section>
+          <h2>3. Accounts &amp; eligibility</h2>
+          <p>Access requires an account that is approved by an administrator. You are responsible for the accuracy of your registration details, for keeping your password confidential, and for all activity under your account. Notify us immediately of any unauthorised use.</p>
+        </section>
+
+        <section>
+          <h2>4. Acceptable use</h2>
+          <ul>
+            <li>Upload only files you are authorised to process.</li>
+            <li>Do not attempt to disrupt, reverse-engineer, or gain unauthorised access to the Platform.</li>
+            <li>Do not use the Platform for unlawful purposes or to infringe others' rights.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>5. Accuracy &amp; no financial advice</h2>
+          <p>Reference rates are sourced from FBIL and are provided on an "as is" basis. While we backfill and validate data automatically, we do not guarantee that any rate is complete, current, or error-free. Nothing on the Platform constitutes financial, accounting, tax, or legal advice. Verify figures before relying on them.</p>
+        </section>
+
+        <section>
+          <h2>6. Intellectual property</h2>
+          <p>The Platform, its design, and its software are owned by Patience AI. FBIL rate data remains the property of its respective owner. Your uploaded files and their processed outputs remain yours.</p>
+        </section>
+
+        <section>
+          <h2>7. Suspension &amp; termination</h2>
+          <p>We may suspend or terminate access that violates these Terms or that poses a security or legal risk. You may stop using the Platform at any time and request account deletion.</p>
+        </section>
+
+        <section>
+          <h2>8. Limitation of liability</h2>
+          <p>To the maximum extent permitted by law, the Platform is provided without warranties of any kind, and Patience AI is not liable for indirect, incidental, or consequential losses arising from use of, or inability to use, the Platform.</p>
+        </section>
+
+        <section>
+          <h2>9. Changes</h2>
+          <p>We may update these Terms from time to time. Material changes will be reflected by the "Last updated" date above. Continued use after changes constitutes acceptance.</p>
+        </section>
+
+        <section>
+          <h2>10. Governing law</h2>
+          <p>These Terms are governed by the laws of India, and disputes are subject to the exclusive jurisdiction of the courts of India.</p>
+        </section>
+      }
+
+      <!-- ─────────────── PRIVACY POLICY ─────────────── -->
+      @case ('privacy') {
+        <h1>Privacy Policy</h1>
+        <p class="legal-updated">Last updated: {{ updated }}</p>
+
+        <section>
+          <h2>1. Who we are</h2>
+          <p>Xchange Verse is operated by Patience AI (the "data fiduciary"). This policy explains what personal data we collect, why, and your rights over it.</p>
+        </section>
+
+        <section>
+          <h2>2. What we collect</h2>
+          <ul>
+            <li><strong>Account data:</strong> username, email address (optional), and a securely hashed password.</li>
+            <li><strong>Uploaded content:</strong> the spreadsheet files you submit for processing and the processed outputs.</li>
+            <li><strong>Usage &amp; technical data:</strong> basic logs needed to operate the service securely (e.g., request metadata).</li>
+            <li><strong>Consent records:</strong> your cookie/data-processing consent choices.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>3. How we use it</h2>
+          <ul>
+            <li>To authenticate you and provide the rate-management and file-processing features.</li>
+            <li>To match FBIL reference rates to the rows in your files.</li>
+            <li>To send account-related emails (e.g., approval notifications).</li>
+            <li>To keep the Platform secure and to comply with legal obligations.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>4. Where your data is stored &amp; who processes it</h2>
+          <p>Data is stored in our managed PostgreSQL database. Uploaded and processed files are stored in Cloudflare R2 object storage. We use a small number of third-party processors strictly to run the service:</p>
+          <ul>
+            <li><strong>FBIL</strong> — source of published reference rates (no personal data is sent to FBIL).</li>
+            <li><strong>Cloudflare R2</strong> — file storage.</li>
+            <li><strong>Email provider (SMTP)</strong> — transactional emails.</li>
+            <li><strong>AI column-detection provider</strong> — only column headers and a few sample rows may be sent to help auto-detect your file's structure; we do not send this data for advertising.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>5. We do not sell your data</h2>
+          <p>We never sell or rent your personal data or uploaded content. We do not use your files to train third-party models.</p>
+        </section>
+
+        <section>
+          <h2>6. Retention</h2>
+          <p>Account data is kept while your account is active. When you delete a processed file from your history, the stored file is removed from object storage; a minimal record (counts and file name) may be retained for your usage history and administrative reporting. You may request full deletion of your account and associated data.</p>
+        </section>
+
+        <section>
+          <h2>7. Security</h2>
+          <p>We use industry-standard measures — encrypted transport (HTTPS), hashed passwords, access controls, and restricted network access — to protect your data. No method of transmission or storage is completely secure, but we work to protect your information.</p>
+        </section>
+
+        <section>
+          <h2>8. Your rights</h2>
+          <p>You can access, correct, or delete your data, and withdraw consent. See the <a routerLink="/legal/data">Data Collection</a> notice for how to exercise these rights.</p>
+        </section>
+
+        <section>
+          <h2>9. Contact</h2>
+          <p>Questions about this policy? Reach us through the in-app <strong>Support</strong> option or at <a href="mailto:privacy&#64;patienceai.in">privacy&#64;patienceai.in</a>.</p>
+        </section>
+      }
+
+      <!-- ─────────────── DATA COLLECTION (DPDP) ─────────────── -->
+      @case ('data') {
+        <h1>Data Collection Notice</h1>
+        <p class="legal-updated">Last updated: {{ updated }} · Aligned with India's Digital Personal Data Protection Act, 2023 (DPDP)</p>
+
+        <section>
+          <h2>1. Purpose of this notice</h2>
+          <p>This notice explains, in plain terms, the personal data Xchange Verse collects from you (the "data principal"), why we collect it, and the choices you have. Patience AI is the data fiduciary responsible for this data.</p>
+        </section>
+
+        <section>
+          <h2>2. Data we collect &amp; why</h2>
+          <table class="legal-table">
+            <thead><tr><th>Data</th><th>Purpose</th><th>Basis</th></tr></thead>
+            <tbody>
+              <tr><td>Username, email</td><td>Account creation, sign-in, notifications</td><td>Consent / contract</td></tr>
+              <tr><td>Hashed password</td><td>Securing your account</td><td>Contract</td></tr>
+              <tr><td>Uploaded spreadsheets</td><td>Matching FBIL reference rates</td><td>Consent / contract</td></tr>
+              <tr><td>Consent records</td><td>Proof of your choices</td><td>Legal obligation</td></tr>
+              <tr><td>Operational logs</td><td>Security, troubleshooting</td><td>Legitimate use</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <h2>3. Consent</h2>
+          <p>We ask for your consent before non-essential processing via the consent banner shown when you first use the Platform. You can withdraw consent at any time; withdrawal does not affect processing already carried out, and some features may stop working if consent is required for them.</p>
+        </section>
+
+        <section>
+          <h2>4. Your rights as a data principal</h2>
+          <ul>
+            <li><strong>Access</strong> — request a summary of the personal data we hold about you.</li>
+            <li><strong>Correction</strong> — ask us to correct inaccurate or incomplete data.</li>
+            <li><strong>Erasure</strong> — request deletion of your data and account.</li>
+            <li><strong>Withdraw consent</strong> — at any time, through the consent controls.</li>
+            <li><strong>Grievance redressal</strong> — raise a concern and receive a response.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>5. Storage &amp; cross-border processing</h2>
+          <p>Personal data is stored in our managed database; files are stored in Cloudflare R2. Some processors (e.g., storage and email) may process data outside India in line with applicable law and appropriate safeguards.</p>
+        </section>
+
+        <section>
+          <h2>6. Retention &amp; deletion</h2>
+          <p>We keep data only as long as needed for the purposes above or as required by law. Deleting a file from your history removes the stored file; a minimal usage record may remain. Deleting your account removes your personal data, subject to legal retention requirements.</p>
+        </section>
+
+        <section>
+          <h2>7. How to exercise your rights / grievances</h2>
+          <p>Use the in-app <strong>Support</strong> option or email our grievance contact at <a href="mailto:privacy&#64;patienceai.in">privacy&#64;patienceai.in</a>. We aim to respond within a reasonable period as required under the DPDP Act.</p>
+        </section>
+      }
+    }
+
+    <div class="legal-foot">
+      <a routerLink="/">&larr; Back to Xchange Verse</a>
+      <span>A product of <a href="https://patienceai.in" target="_blank" rel="noopener"><strong>Patience AI</strong></a></span>
+    </div>
+  </main>
+</div>

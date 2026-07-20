@@ -23,7 +23,7 @@ export class AdminComponent implements OnInit {
   statsLoading = false;
   actionLoading: { [id: number]: string } = {};
   toasts: Toast[] = [];
-  isDark = true;
+  isDark = false;
   filterStatus = 'all';
   showDeleteConfirm: number | null = null;
   editingUser: any = null;

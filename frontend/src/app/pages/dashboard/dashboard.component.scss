@@ -964,3 +964,14 @@
   }
   &:disabled { opacity: 0.6; cursor: default; }
 }
+
+.footer-legal {
+  display: block;
+  margin-bottom: 6px;
+  a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    &:hover { color: var(--accent-primary); }
+  }
+}

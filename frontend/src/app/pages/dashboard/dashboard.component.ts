@@ -22,7 +22,7 @@ import { SupportModalService } from '../../core/services/support-modal.service';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   activeTab: 'rates' | 'processing' = 'rates';
-  isDark = true;
+  isDark = false;
   user: any = null;
   toasts: Toast[] = [];
 
