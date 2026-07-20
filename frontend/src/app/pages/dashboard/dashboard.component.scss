@@ -541,7 +541,12 @@
 .success-text { color: var(--success); font-weight: 600; }
 
 .footer {
-  // Uses global styles
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 16px 32px;
 }
 
 @media (max-width: 992px) {
@@ -966,8 +971,6 @@
 }
 
 .footer-legal {
-  display: block;
-  margin-bottom: 6px;
   a {
     color: var(--text-secondary);
     text-decoration: none;
