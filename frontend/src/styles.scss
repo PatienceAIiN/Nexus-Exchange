@@ -15,6 +15,8 @@
   --warning: #f59e0b;
   --success: #10b981;
   --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  --glass-card: rgba(26, 32, 53, 0.7);
+  --glass-nav: rgba(10, 14, 23, 0.82);
 }
 
 :root[data-theme="light"] {
@@ -32,6 +34,8 @@
   --warning: #d97706;
   --success: #059669;
   --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --glass-card: rgba(255, 255, 255, 0.75);
+  --glass-nav: rgba(255, 255, 255, 0.85);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }

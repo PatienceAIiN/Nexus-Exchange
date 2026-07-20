@@ -280,29 +280,20 @@
   </div>
 }
 
-<!-- PROCESSED FILE DOWNLOAD FORMAT MODAL (xlsx / csv / pdf) -->
+<!-- PROCESSED FILE DOWNLOAD FORMAT MODAL — format names only -->
 @if (showFormatModal) {
   <div class="modal-backdrop format-picker-backdrop" (click)="showFormatModal=false">
-    <div class="modal download-modal" (click)="$event.stopPropagation()">
+    <div class="modal format-only-modal" (click)="$event.stopPropagation()">
       <button class="modal-close" type="button" (click)="showFormatModal=false">✕</button>
-      <div class="modal-kicker">Export processed file</div>
-      <h2>Choose download format</h2>
-      <p class="text-secondary mt-8">Your processed file — with FBIL reference rates filled in — in whichever format you need.</p>
-      <div class="format-grid mt-24">
-        <button class="format-card" type="button" (click)="downloadInFormat('xlsx')" [disabled]="!!downloadingFmt">
-          @if (downloadingFmt==='xlsx') { <span class="spinner"></span> } @else { <span class="format-icon">XLS</span> }
-          <strong>Excel Workbook</strong>
-          <small>Formatted .xlsx spreadsheet</small>
+      <div class="format-name-row">
+        <button class="format-name-btn" type="button" (click)="downloadInFormat('xlsx')" [disabled]="!!downloadingFmt">
+          @if (downloadingFmt==='xlsx') { <span class="spinner"></span> } @else { XLS }
         </button>
-        <button class="format-card" type="button" (click)="downloadInFormat('csv')" [disabled]="!!downloadingFmt">
-          @if (downloadingFmt==='csv') { <span class="spinner"></span> } @else { <span class="format-icon">CSV</span> }
-          <strong>CSV File</strong>
-          <small>Spreadsheet-friendly raw data</small>
+        <button class="format-name-btn" type="button" (click)="downloadInFormat('csv')" [disabled]="!!downloadingFmt">
+          @if (downloadingFmt==='csv') { <span class="spinner"></span> } @else { CSV }
         </button>
-        <button class="format-card" type="button" (click)="downloadInFormat('pdf')" [disabled]="!!downloadingFmt">
-          @if (downloadingFmt==='pdf') { <span class="spinner"></span> } @else { <span class="format-icon">PDF</span> }
-          <strong>PDF Report</strong>
-          <small>Shareable snapshot report</small>
+        <button class="format-name-btn" type="button" (click)="downloadInFormat('pdf')" [disabled]="!!downloadingFmt">
+          @if (downloadingFmt==='pdf') { <span class="spinner"></span> } @else { PDF }
         </button>
       </div>
     </div>

@@ -504,15 +504,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.showFormatModal = true;
   }
 
+  private saveBlob(blob: Blob, filename: string): void {
+    // Append the anchor to the DOM before clicking — required by Firefox/Safari
+    // for programmatic downloads to fire reliably.
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
   downloadInFormat(format: 'xlsx' | 'csv' | 'pdf'): void {
     if (this.formatTargetId == null || this.downloadingFmt) return;
     this.downloadingFmt = format;
     this.proc.downloadFile(this.formatTargetId, format).subscribe({
       next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `${this.formatTargetBase}_processed.${format}`; a.click();
-        URL.revokeObjectURL(url);
+        this.saveBlob(blob, `${this.formatTargetBase}_processed.${format}`);
         this.downloadingFmt = '';
         this.showFormatModal = false;
         this.toastSvc.success(`Downloaded ${format.toUpperCase()} file`);
@@ -523,7 +534,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   downloadResult(): void {
     if (!this.processResult?.file_id) return;
-    this.openFormatPicker(this.processResult.file_id, this.selectedFile?.name);
+    const id = this.processResult.file_id;
+    const name = this.selectedFile?.name;
+    this.showResultModal = false;          // close result modal so the picker isn't buried behind it
+    this.openFormatPicker(id, name);
   }
 
   openHistory(): void {

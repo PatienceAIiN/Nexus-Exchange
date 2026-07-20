@@ -149,8 +149,11 @@ export class AdminComponent implements OnInit {
         const base = (file.original_filename || 'processed').replace(/\.(xlsx|csv)$/i, '');
         a.href = url;
         a.download = file.processed_filename || `${base}.xlsx`;
+        a.style.display = 'none';
+        document.body.appendChild(a);
         a.click();
-        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
         this.downloadingFileId = null;
       },
       error: () => { this.downloadingFileId = null; this.toast.error('Download failed'); }
