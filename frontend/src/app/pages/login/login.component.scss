@@ -23,19 +23,19 @@
 
   &.blob-1 {
     width: 500px; height: 500px;
-    background: #00d4aa;
+    background: #4a4a52;
     top: -100px; left: -100px;
     animation-delay: 0s;
   }
   &.blob-2 {
     width: 400px; height: 400px;
-    background: #6366f1;
+    background: #2e2e34;
     bottom: -80px; right: -80px;
     animation-delay: -3s;
   }
   &.blob-3 {
     width: 300px; height: 300px;
-    background: #00d4aa;
+    background: #4a4a52;
     top: 50%; left: 60%;
     animation-delay: -5s;
   }
@@ -117,12 +117,12 @@
     backdrop-filter: none;
     border: none;
   }
-  .brand h1 { font-size: 24px; }
+  .brand h1 { font-size: 30px; letter-spacing: -0.01em; }
   .blob { display: none; } // Hide heavy blobs on small mobile for performance
 }
 
 
-.market-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(99,102,241,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.08) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at center,black 50%,transparent 95%);animation:gridDrift 14s linear infinite;}
+.market-grid{position:absolute;inset:0;background-image:linear-gradient(var(--tint) 1px,transparent 1px),linear-gradient(90deg,rgba(16,185,129,.08) 1px,transparent 1px);background-size:42px 42px;mask-image:radial-gradient(circle at center,black 50%,transparent 95%);animation:gridDrift 14s linear infinite;}
 .ticker-strip{position:absolute;bottom:24px;left:0;right:0;overflow:hidden;opacity:.35;font-weight:600;white-space:nowrap;}
 .ticker-strip span{display:inline-block;padding-left:100%;animation:ticker 16s linear infinite;}
 .centered-auth-btn{justify-content:center;min-height:46px;position:relative;}

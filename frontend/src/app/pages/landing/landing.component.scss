@@ -22,8 +22,8 @@
   z-index: 1;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(0, 212, 170, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(99, 102, 241, 0.06) 1px, transparent 1px);
+    linear-gradient(var(--tint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--tint) 1px, transparent 1px);
   background-size: 64px 64px;
   mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
   -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 85%);
@@ -47,16 +47,16 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.l-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.l-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 30px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
 .l-nav-links { display: flex; align-items: center; gap: 28px; }
 .l-link { color: var(--text-secondary); text-decoration: none; font-size: 14px; font-weight: 500; letter-spacing: 0.02em; transition: color .2s; &:hover{color:var(--text-primary);} }
-.support-nav-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid rgba(0,212,170,.35); background: rgba(0,212,170,.08); color: var(--text-primary); cursor: pointer; font-size: 20px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 18px rgba(0,212,170,.16); transition: transform .2s, border-color .2s, background .2s; &:hover{ transform: translateY(-1px); border-color: rgba(0,212,170,.7); background: rgba(0,212,170,.16); } }
+.support-nav-btn { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--tint); background: var(--tint); color: var(--text-primary); cursor: pointer; font-size: 20px; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 0 18px var(--tint); transition: transform .2s, border-color .2s, background .2s; &:hover{ transform: translateY(-1px); border-color: var(--tint); background: var(--tint); } }
 
 .l-section { position: relative; z-index: 2; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 80px 24px 60px; }
 .hero-section { padding-top: 120px; }
 .hero-eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: var(--accent-primary); margin-bottom: 24px; animation: fadeUp .8s ease .2s both; }
 .hero-headline { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(56px, 10vw, 128px); font-weight: 700; line-height: .96; letter-spacing: -.01em; text-transform: uppercase; margin-bottom: 28px; animation: fadeUp .8s ease .35s both; }
-.accent-em { font-style: normal; background: linear-gradient(90deg, #00d4aa, #6366f1, #00d4aa); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: gradientShift 4s linear infinite; }
+.accent-em { font-style: normal; background: linear-gradient(90deg, var(--logo-base), var(--logo-shine), var(--logo-base)); background-size: 200% auto; -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; animation: gradientShift 4s linear infinite; }
 .hero-sub { max-width: 600px; font-size: clamp(15px, 2vw, 18px); font-weight: 300; line-height: 1.6; color: var(--text-secondary); margin-bottom: 40px; animation: fadeUp .8s ease .5s both; }
 .hero-actions { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; animation: fadeUp .8s ease .65s both; }
 .hero-btn,.cta-btn { min-width:180px; height:52px; font-size:15px; font-weight:600; letter-spacing:.04em; border-radius:6px; text-decoration:none; display:inline-flex; align-items:center; justify-content:center; }
@@ -68,7 +68,7 @@
 .section-headline { font-family:'Barlow Condensed', sans-serif; font-size:clamp(36px,6vw,80px); font-weight:700; line-height:1; letter-spacing:-.01em; text-transform:uppercase; margin-bottom:32px; }
 .section-sub { max-width:520px; font-size:15px; font-weight:300; color:var(--text-secondary); line-height:1.65; margin-bottom:32px; }
 
-.rates-ticker { width:100%; max-width:900px; overflow:hidden; border:1px solid rgba(0,212,170,.2); border-radius:12px; background:rgba(0,212,170,.04); padding:20px 0; }
+.rates-ticker { width:100%; max-width:900px; overflow:hidden; border:1px solid var(--tint); border-radius:12px; background:var(--tint); padding:20px 0; }
 .ticker-track { display:flex; animation:tickerScroll 18s linear infinite; }
 .ticker-item { display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:180px; padding:0 24px; border-right:1px solid var(--border-color); gap:6px;
   .pair { font-size:11px; font-weight:600; letter-spacing:.12em; text-transform:uppercase; color:var(--text-secondary); }
@@ -78,13 +78,13 @@
 
 .features-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:24px; max-width:960px; width:100%; margin-top:8px; }
 .feature-card { background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:16px; padding:36px 28px; text-align:left; transition:border-color .3s, background .3s, transform .3s;
-  &:hover{ border-color:rgba(0,212,170,.35); background:rgba(0,212,170,.05); transform:translateY(-4px); }
+  &:hover{ border-color:var(--tint); background:var(--tint); transform:translateY(-4px); }
   .feature-icon{ font-size:32px; margin-bottom:20px; }
   h3{ font-family:'Barlow Condensed', sans-serif; font-size:22px; font-weight:700; text-transform:uppercase; margin-bottom:12px; color:var(--text-primary); }
   p{ font-size:14px; font-weight:300; line-height:1.7; color:var(--text-secondary); }
 }
 
-.cta-section::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, rgba(0,212,170,.12), transparent 60%); pointer-events:none; }
+.cta-section::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 50% 50%, var(--tint), transparent 60%); pointer-events:none; }
 .cta-headline { font-family:'Barlow Condensed', sans-serif; font-size:clamp(40px,7vw,96px); font-weight:700; text-transform:uppercase; line-height:.96; margin-bottom:24px; }
 .cta-sub { font-size:16px; font-weight:300; color:var(--text-secondary); margin-bottom:40px; max-width:480px; }
 .cta-actions { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }

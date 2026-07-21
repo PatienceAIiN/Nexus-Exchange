@@ -74,7 +74,7 @@
   font-size: 14px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s;
   &-primary { background: var(--accent-primary); color: #fff; &:hover { opacity: 0.9; } &:disabled { opacity: 0.5; } }
   &-ghost { background: transparent; color: var(--text-primary); border: 1px solid var(--border-color); &:hover { background: var(--bg-elevated); } }
-  &-outline { background: transparent; color: var(--accent-primary); border: 1px solid var(--accent-primary); &:hover { background: rgba(99,102,241,0.08); } }
+  &-outline { background: transparent; color: var(--accent-primary); border: 1px solid var(--accent-primary); &:hover { background: var(--tint); } }
   &-danger { background: var(--danger, #ef4444); color: #fff; &:hover { opacity: 0.9; } &:disabled { opacity: 0.5; } }
 }
 .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }

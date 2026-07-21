@@ -42,7 +42,7 @@
       &.active {
         color: var(--accent-primary);
         border-color: var(--accent-primary);
-        background: rgba(0, 212, 170, 0.08);
+        background: var(--tint);
       }
     }
   }
