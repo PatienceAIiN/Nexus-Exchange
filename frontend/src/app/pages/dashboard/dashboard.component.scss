@@ -424,8 +424,8 @@
     padding: 4px 8px;
     border-radius: 999px;
     white-space: nowrap;
-    &.upload { background: rgba(11, 110, 79, 0.14); color: #0B6E4F; }
-    &.result { background: rgba(37, 99, 235, 0.14); color: #2563EB; }
+    &.upload { background: var(--tint); color: var(--text-primary); }
+    &.result { background: var(--accent-primary); color: var(--accent-contrast); }
   }
   .sample-meta {
     display: flex;
@@ -687,7 +687,7 @@
     &.active {
       background: var(--accent-primary);
       border-color: var(--accent-primary);
-      color: #001b16;
+      color: var(--accent-contrast);
       box-shadow: 0 8px 18px var(--tint);
     }
 
