@@ -220,6 +220,7 @@ async def process_expense_file(
     total_rows = 0
     matched_rows = 0
     unmatched_rows = 0
+    skipped_no_date = 0
     unmatched_dates = []
 
     for idx in range(len(df)):
@@ -230,14 +231,18 @@ async def process_expense_file(
         if not currency_val or currency_val in ("INR", "NAN", "", "NONE", "NAT"):
             continue
 
-        total_rows += 1
-
         parsed_date = _parse_date(row.get(date_col))
 
+        # A row with a foreign currency but no usable date cannot be matched to a
+        # rate (there is nothing to look up). Count it as "skipped — no date"
+        # rather than "unmatched", so the match rate reflects only rows that
+        # actually carry a date. We never guess/forward-fill dates — that could
+        # attach a wrong rate to a financial figure.
         if parsed_date is None:
-            unmatched_rows += 1
-            unmatched_dates.append(str(row.get(date_col, "?")))
+            skipped_no_date += 1
             continue
+
+        total_rows += 1
 
         # Emit progress every 30 rows
         if total_rows % 30 == 0 and progress_callback:
@@ -271,6 +276,7 @@ async def process_expense_file(
         "total_rows": total_rows,
         "matched_rows": matched_rows,
         "unmatched_rows": unmatched_rows,
+        "skipped_no_date": skipped_no_date,
         "unmatched_dates": sorted(set(unmatched_dates))[:30],
         "date_col": date_col,
         "currency_col": currency_col,

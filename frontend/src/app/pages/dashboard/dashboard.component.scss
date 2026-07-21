@@ -978,3 +978,16 @@
     &:hover { color: var(--accent-primary); }
   }
 }
+
+.stat-card.muted {
+  .stat-num { color: var(--text-secondary); }
+}
+.skip-note {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: 10px;
+  padding: 12px 14px;
+}

@@ -263,7 +263,20 @@
           <div class="stat-num">{{ processResult.stats?.unmatched_rows || 0 }}</div>
           <div class="stat-label">Unmatched</div>
         </div>
+        @if (processResult.stats?.skipped_no_date > 0) {
+          <div class="stat-card muted">
+            <div class="stat-num">{{ processResult.stats.skipped_no_date }}</div>
+            <div class="stat-label">Skipped · no date</div>
+          </div>
+        }
       </div>
+
+      @if (processResult.stats?.skipped_no_date > 0) {
+        <p class="skip-note mt-16">
+          ⚠️ {{ processResult.stats.skipped_no_date }} row(s) had a currency but no date, so no reference rate could be looked up.
+          Add a valid date to those rows in your file to include them. "Total Rows" counts only rows that have a date.
+        </p>
+      }
 
       @if (processResult.stats?.unmatched_dates?.length > 0) {
         <div class="unmatched-section mt-16">
