@@ -35,7 +35,7 @@ export class AppComponent {
 
   private updateFloatingSupportVisibility() {
     const route = this.router.url;
-    this.showFloatingSupport = route === '/' || route === '/login' || route === '/signup' || route === '/admin/login';
+    this.showFloatingSupport = route === '/login' || route === '/signup' || route === '/admin/login';
   }
 
   openSupport() { this.supportOpen = true; }

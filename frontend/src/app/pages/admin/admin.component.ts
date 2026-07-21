@@ -37,6 +37,16 @@ export class AdminComponent implements OnInit {
   userFilesLoading = false;
   downloadingFileId: number | null = null;
 
+  // Activity / security log
+  showLog = false;
+  logItems: any[] = [];
+  logLoading = false;
+  logPage = 1;
+  logPages = 1;
+  logTotal = 0;
+  readonly logPerPage = 20;
+  downloadingLog = false;
+
   constructor(
     private http: HttpClient,
     private toast: ToastService,
@@ -157,6 +167,51 @@ export class AdminComponent implements OnInit {
         this.downloadingFileId = null;
       },
       error: () => { this.downloadingFileId = null; this.toast.error('Download failed'); }
+    });
+  }
+
+  openLog(): void {
+    this.showLog = true;
+    this.logPage = 1;
+    this.loadLog();
+  }
+
+  loadLog(): void {
+    this.logLoading = true;
+    this.http.get<any>(`/api/admin/logs/files?page=${this.logPage}&per_page=${this.logPerPage}`).subscribe({
+      next: (res) => {
+        this.logItems = res.items || [];
+        this.logTotal = res.total || 0;
+        this.logPages = Math.max(res.pages || 1, 1);
+        this.logLoading = false;
+      },
+      error: () => { this.logLoading = false; this.toast.error('Failed to load activity log'); }
+    });
+  }
+
+  logGoTo(p: number): void {
+    if (p < 1 || p > this.logPages || p === this.logPage) return;
+    this.logPage = p;
+    this.loadLog();
+  }
+
+  downloadLog(): void {
+    this.downloadingLog = true;
+    this.http.get('/api/admin/logs/files/download', { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'processed_files_log.csv';
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        this.downloadingLog = false;
+        this.toast.success('Activity log downloaded');
+      },
+      error: () => { this.downloadingLog = false; this.toast.error('Download failed'); }
     });
   }
 

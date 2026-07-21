@@ -1,7 +1,10 @@
 <div class="page-container">
   <header class="header">
     <div class="header-left">
-      <h1 class="gradient-text">Xchange Verse</h1>
+      <div class="brand-block">
+        <h1 class="gradient-text">Xchange Verse</h1>
+        <span class="brand-tagline">by Patience AI</span>
+      </div>
       <span class="badge beta">Admin</span>
     </div>
     <nav class="tab-nav">
@@ -59,6 +62,7 @@
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
         </select>
+        <button class="btn btn-outline" (click)="openLog()"><span class="mi">receipt_long</span> Activity Log</button>
         <button class="btn btn-outline" (click)="loadUsers(); loadStats()"><span class="mi">refresh</span> Refresh</button>
       </div>
     </div>
@@ -125,7 +129,7 @@
   </main>
 
   <footer class="footer">
-    <span>A product of <a href="https://patienceai.in" target="_blank"><strong>Patience AI</strong></a></span>
+    <span>All copyright reserved &#64;2026</span>
   </footer>
 </div>
 
@@ -197,7 +201,7 @@
                     {{ f.original_filename }}
                     @if (f.is_deleted) { <span class="deleted-tag">deleted</span> }
                   </strong>
-                  <small>{{ f.created_at | slice:0:10 }} · {{ f.matched_rows }}/{{ f.total_rows }} matched · {{ f.status }}</small>
+                  <small>{{ f.created_at_ist || (f.created_at | slice:0:10) }} · {{ f.matched_rows }}/{{ f.total_rows }} matched · {{ f.status }}</small>
                 </div>
                 <button class="btn btn-outline admin-file-dl"
                   [title]="f.is_deleted ? 'File removed by user — record kept' : 'Download processed file'"
@@ -226,6 +230,67 @@
       <div class="modal-actions mt-24" style="justify-content:center">
         <button class="btn btn-ghost" (click)="showDeleteConfirm=null">Cancel</button>
         <button class="btn btn-danger" (click)="deleteUser(showDeleteConfirm!)">Delete</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ACTIVITY / SECURITY LOG MODAL -->
+@if (showLog) {
+  <div class="modal-backdrop" (click)="showLog=false">
+    <div class="modal modal-lg" (click)="$event.stopPropagation()">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+        <h2 style="margin:0"><span class="mi">receipt_long</span> Processed Files — Activity Log</h2>
+        <button class="btn btn-primary" style="padding:7px 14px;font-size:13px" [disabled]="downloadingLog" (click)="downloadLog()">
+          @if (downloadingLog) { <span class="spinner"></span> } @else { <span class="mi">download</span> } Download CSV
+        </button>
+      </div>
+      <p class="text-secondary mt-8" style="font-size:13px">Every file processed on the platform — who processed it, when (IST), and the result.</p>
+
+      @if (logLoading) {
+        <div class="loading-state mt-16"><div class="spinner-lg"></div></div>
+      } @else if (logItems.length === 0) {
+        <div class="empty-state mt-16"><p>No processed files yet.</p></div>
+      } @else {
+        <div class="card table-wrapper table-responsive mt-16">
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>File</th>
+                <th>Matched</th>
+                <th>Status</th>
+                <th>Processed at (IST)</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of logItems; track l.id) {
+                <tr>
+                  <td><strong>{{ l.username }}</strong></td>
+                  <td>
+                    {{ l.original_filename }}
+                    @if (l.is_deleted) { <span class="deleted-tag">deleted</span> }
+                  </td>
+                  <td><span class="success-text">{{ l.matched_rows }}</span>/{{ l.total_rows }}</td>
+                  <td><span class="badge {{ l.status === 'completed' ? 'approved' : 'pending' }}">{{ l.status }}</span></td>
+                  <td class="text-secondary">{{ l.created_at_ist }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <div class="pagination mt-16" style="justify-content:space-between">
+          <span class="text-secondary" style="font-size:13px">{{ logTotal }} total · page {{ logPage }} of {{ logPages }}</span>
+          <span style="display:flex; gap:8px">
+            <button class="btn btn-ghost" style="padding:6px 12px" [disabled]="logPage===1" (click)="logGoTo(logPage-1)"><span class="mi">chevron_left</span></button>
+            <button class="btn btn-ghost" style="padding:6px 12px" [disabled]="logPage===logPages" (click)="logGoTo(logPage+1)"><span class="mi">chevron_right</span></button>
+          </span>
+        </div>
+      }
+
+      <div class="modal-actions mt-24">
+        <button class="btn btn-ghost" (click)="showLog=false">Close</button>
       </div>
     </div>
   </div>

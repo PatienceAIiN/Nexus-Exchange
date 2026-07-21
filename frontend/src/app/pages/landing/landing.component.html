@@ -3,7 +3,10 @@
   <div class="bg-grid" aria-hidden="true"></div>
 
   <nav class="l-nav">
-    <span class="l-logo gradient-text">Xchange Verse</span>
+    <span class="brand-block">
+      <span class="l-logo gradient-text">Xchange Verse</span>
+      <span class="brand-tagline">by Patience AI</span>
+    </span>
   </nav>
 
   <section class="l-section hero-section" id="hero-section">
@@ -69,11 +72,10 @@
         <a routerLink="/legal/privacy">Privacy</a>
         <span>&middot;</span>
         <a routerLink="/legal/data">Data Collection</a>
+        <span>&middot;</span>
+        <a href="javascript:void(0)" (click)="openSupport()">Contact us</a>
       </div>
-      <div>
-        All copyright reserved &copy;2026 &bull;
-        A product of <a href="https://patienceai.in" target="_blank" rel="noopener"><strong>Patience AI</strong></a>
-      </div>
+      <div>All copyright reserved &copy;2026</div>
     </footer>
   </section>
 </div>

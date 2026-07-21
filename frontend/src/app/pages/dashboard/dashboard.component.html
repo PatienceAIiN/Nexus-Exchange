@@ -3,7 +3,10 @@
   <!-- HEADER -->
   <header class="header">
     <div class="header-left">
-      <h1 class="brand-name gradient-text">Xchange Verse</h1>
+      <div class="brand-block">
+        <h1 class="brand-name gradient-text">Xchange Verse</h1>
+        <span class="brand-tagline">by Patience AI</span>
+      </div>
     </div>
 
     <nav class="tab-nav">
@@ -226,9 +229,10 @@
     <span class="footer-legal">
       <a routerLink="/legal/terms">Terms</a> ·
       <a routerLink="/legal/privacy">Privacy</a> ·
-      <a routerLink="/legal/data">Data Collection</a>
+      <a routerLink="/legal/data">Data Collection</a> ·
+      <a href="javascript:void(0)" (click)="openSupport()">Contact us</a>
     </span>
-    <span>All copyright reserved &#64;2026 • A product of <a href="https://patienceai.in" target="_blank" rel="noopener"><strong>Patience AI</strong></a></span>
+    <span>All copyright reserved &#64;2026</span>
   </footer>
 </div>
 

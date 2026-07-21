@@ -1,18 +1,32 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Query
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, func
 from database import get_db
 from models import User, SignupStatus, UserRole, ProcessedFile
 from schemas import UserResponse
 from auth import get_current_admin, get_password_hash
 from typing import List, Optional
 from pydantic import BaseModel
+from datetime import datetime, timezone, timedelta
+import csv
 import io
 import logging
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/admin", tags=["admin"])
+
+IST = timezone(timedelta(hours=5, minutes=30))
+
+
+def _ist(dt) -> str:
+    """Format a naive-UTC datetime as India Standard Time, e.g. '21 Jul 2026, 07:07 PM IST'."""
+    if not dt:
+        return ""
+    try:
+        return dt.replace(tzinfo=timezone.utc).astimezone(IST).strftime("%d %b %Y, %I:%M %p IST")
+    except Exception:
+        return str(dt)
 
 
 class UserUpdateRequest(BaseModel):
@@ -203,12 +217,87 @@ async def user_processed_files(
                 "unmatched_rows": f.unmatched_rows,
                 "status": f.status,
                 "created_at": str(f.created_at),
+                "created_at_ist": _ist(f.created_at),
                 "is_deleted": bool(f.is_deleted),
                 "downloadable": bool(f.r2_processed_key) and not f.is_deleted,
             }
             for f in files
         ],
     }
+
+
+@router.get("/logs/files")
+async def processed_files_log(
+    page: int = Query(1, ge=1),
+    per_page: int = Query(20, ge=1, le=200),
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+    """Paginated activity/security log of every processed file across all users."""
+    total = (await db.execute(select(func.count(ProcessedFile.id)))).scalar_one()
+    offset = (page - 1) * per_page
+    rows = (await db.execute(
+        select(ProcessedFile, User.username)
+        .join(User, User.id == ProcessedFile.user_id, isouter=True)
+        .order_by(ProcessedFile.created_at.desc())
+        .offset(offset).limit(per_page)
+    )).all()
+    return {
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "pages": (total + per_page - 1) // per_page,
+        "items": [
+            {
+                "id": f.id,
+                "user_id": f.user_id,
+                "username": username or f"user#{f.user_id}",
+                "original_filename": f.original_filename,
+                "processed_filename": f.processed_filename,
+                "total_rows": f.total_rows,
+                "matched_rows": f.matched_rows,
+                "unmatched_rows": f.unmatched_rows,
+                "status": f.status,
+                "created_at_ist": _ist(f.created_at),
+                "is_deleted": bool(f.is_deleted),
+                "downloadable": bool(f.r2_processed_key) and not f.is_deleted,
+            }
+            for (f, username) in rows
+        ],
+    }
+
+
+@router.get("/logs/files/download")
+async def download_processed_files_log(
+    db: AsyncSession = Depends(get_db),
+    _=Depends(get_current_admin),
+):
+    """Download the full processed-files activity log (all users) as CSV."""
+    rows = (await db.execute(
+        select(ProcessedFile, User.username)
+        .join(User, User.id == ProcessedFile.user_id, isouter=True)
+        .order_by(ProcessedFile.created_at.desc())
+    )).all()
+
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["#", "User", "Original file", "Processed file", "Total rows",
+                "Matched", "Unmatched", "Status", "Processed at (IST)", "File deleted"])
+    for i, (f, username) in enumerate(rows, 1):
+        w.writerow([
+            i, username or f"user#{f.user_id}", f.original_filename, f.processed_filename,
+            f.total_rows, f.matched_rows, f.unmatched_rows, f.status,
+            _ist(f.created_at), "yes" if f.is_deleted else "no",
+        ])
+    w.writerow([])
+    w.writerow(["Xchange Verse — processed files activity log", "A product of Patience AI"])
+
+    stamp = datetime.now(IST).strftime("%Y%m%d_%H%M")
+    return StreamingResponse(
+        io.BytesIO(buf.getvalue().encode("utf-8")),
+        media_type="text/csv",
+        headers={"Content-Disposition": f'attachment; filename="processed_files_log_{stamp}.csv"'},
+    )
 
 
 @router.get("/files/{file_id}/download")
