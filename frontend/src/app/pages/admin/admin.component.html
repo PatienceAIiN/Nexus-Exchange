@@ -5,17 +5,17 @@
       <span class="badge beta">Admin</span>
     </div>
     <nav class="tab-nav">
-      <span class="tab-btn active">🛡 Admin Panel</span>
+      <span class="tab-btn active"><span class="mi">shield</span> Admin Panel</span>
     </nav>
     <div class="header-right">
-      <button class="icon-btn" (click)="theme.toggle()">{{ isDark ? '☀️' : '🌙' }}</button>
+      <button class="icon-btn" (click)="theme.toggle()"><span class="mi">{{ isDark ? 'light_mode' : 'dark_mode' }}</span></button>
       <div class="avatar-wrapper" (click)="showProfile=!showProfile">
-        <button class="icon-btn">👤</button>
+        <button class="icon-btn"><span class="mi">account_circle</span></button>
         @if (showProfile) {
           <div style="position:fixed;top:0;left:0;right:0;bottom:0;z-index:190" (click)="$event.stopPropagation(); showProfile=false"></div>
           <div class="profile-dropdown" style="position:absolute;z-index:200" (click)="$event.stopPropagation()">
             <button class="support-btn" (click)="openSupport()">Support</button>
-            <button class="danger" (click)="showProfile=false; logout()">🚪 Logout</button>
+            <button class="danger" (click)="showProfile=false; logout()"><span class="mi">logout</span> Logout</button>
           </div>
         }
       </div>
@@ -59,7 +59,7 @@
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
         </select>
-        <button class="btn btn-outline" (click)="loadUsers(); loadStats()">↻ Refresh</button>
+        <button class="btn btn-outline" (click)="loadUsers(); loadStats()"><span class="mi">refresh</span> Refresh</button>
       </div>
     </div>
 
@@ -99,20 +99,20 @@
                     @if (user.signup_status === 'pending') {
                       <button class="btn btn-primary" style="padding:5px 12px;font-size:12px"
                         [disabled]="actionLoading[user.id]" (click)="approve(user.id)">
-                        @if (actionLoading[user.id]==='approving') { <span class="spinner"></span> } ✓
+                        @if (actionLoading[user.id]==='approving') { <span class="spinner"></span> } <span class="mi">check</span>
                       </button>
                       <button class="btn btn-danger" style="padding:5px 12px;font-size:12px"
                         [disabled]="actionLoading[user.id]" (click)="reject(user.id)">
-                        @if (actionLoading[user.id]==='rejecting') { <span class="spinner"></span> } ✕
+                        @if (actionLoading[user.id]==='rejecting') { <span class="spinner"></span> } <span class="mi">close</span>
                       </button>
                     }
                     <button class="btn btn-outline" style="padding:5px 12px;font-size:12px" (click)="openView(user)">View</button>
                     <button class="btn btn-outline" style="padding:5px 12px;font-size:12px" (click)="openEdit(user)">
-                      ✏️
+                      <span class="mi">edit</span>
                     </button>
                     <button class="btn btn-danger" style="padding:5px 12px;font-size:12px"
                       [disabled]="actionLoading[user.id]==='deleting'" (click)="confirmDelete(user.id)">
-                      @if (actionLoading[user.id]==='deleting') { <span class="spinner"></span> } 🗑
+                      @if (actionLoading[user.id]==='deleting') { <span class="spinner"></span> } <span class="mi">delete</span>
                     </button>
                   </div>
                 </td>
@@ -133,7 +133,7 @@
 @if (editingUser) {
   <div class="modal-backdrop" (click)="editingUser=null">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h2>✏️ Edit User — {{ editingUser.username }}</h2>
+      <h2><span class="mi">edit</span> Edit User — {{ editingUser.username }}</h2>
       <div class="mt-24">
         <div class="input-group">
           <label>Email</label>
@@ -169,7 +169,7 @@
 @if (viewingUser) {
   <div class="modal-backdrop" (click)="viewingUser=null">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h2>👁 User Details</h2>
+      <h2><span class="mi">visibility</span> User Details</h2>
       <div class="view-grid mt-24">
         <p><strong>Username:</strong> {{ viewingUser.username }}</p>
         <p><strong>Email:</strong> {{ viewingUser.email || '—' }}</p>
@@ -181,7 +181,7 @@
 
       <div class="mt-24">
         <h4 class="files-heading">
-          📄 Files processed
+          <span class="mi">description</span> Files processed
           <span class="count-badge">{{ userFilesLoading ? '…' : userFilesCount }}</span>
         </h4>
         @if (userFilesLoading) {
@@ -202,7 +202,7 @@
                 <button class="btn btn-outline admin-file-dl"
                   [title]="f.is_deleted ? 'File removed by user — record kept' : 'Download processed file'"
                   [disabled]="!f.downloadable || downloadingFileId===f.id" (click)="downloadUserFile(f)">
-                  @if (downloadingFileId===f.id) { <span class="spinner"></span> } @else { ⬇ }
+                  @if (downloadingFileId===f.id) { <span class="spinner"></span> } @else { <span class="mi">download</span> }
                 </button>
               </div>
             }

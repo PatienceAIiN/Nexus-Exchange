@@ -7,13 +7,13 @@
     </div>
 
     <nav class="tab-nav">
-      <button class="tab-btn" [class.active]="activeTab==='rates'" (click)="setActiveTab('rates')"><span>📈</span> Live Rates</button>
-      <button class="tab-btn" [class.active]="activeTab==='processing'" (click)="setActiveTab('processing')"><span>📂</span> Manual Update</button>
+      <button class="tab-btn" [class.active]="activeTab==='rates'" (click)="setActiveTab('rates')"><span><span class="mi">trending_up</span></span> Live Rates</button>
+      <button class="tab-btn" [class.active]="activeTab==='processing'" (click)="setActiveTab('processing')"><span><span class="mi">folder_open</span></span> Auto Process</button>
     </nav>
 
     <div class="header-right">
       <button class="icon-btn" (click)="theme.toggle()" title="Toggle theme">
-        {{ isDark ? '☀️' : '🌙' }}
+        <span class="mi">{{ isDark ? 'light_mode' : 'dark_mode' }}</span>
       </button>
 
       <div class="avatar-wrapper" (click)="toggleProfileMenu($event)">
@@ -28,9 +28,9 @@
               </span>
               <span class="badge {{ user?.role }}">{{ user?.role }}</span>
             </button>
-            <button class="support-btn" (click)="openSupport()"><span>💬</span> Support</button>
-            <button (click)="showProfile=false; showChangePassword=true">🔑 Change Password</button>
-            <button class="danger" (click)="showProfile=false; showLogout=true">🚪 Logout</button>
+            <button class="support-btn" (click)="openSupport()"><span><span class="mi">support_agent</span></span> Support</button>
+            <button (click)="showProfile=false; showChangePassword=true"><span class="mi">key</span> Change Password</button>
+            <button class="danger" (click)="showProfile=false; showLogout=true"><span class="mi">logout</span> Logout</button>
           </div>
         }
       </div>
@@ -42,7 +42,7 @@
 
     <!-- LIVE RATES TAB -->
     @if (activeTab === 'rates') {
-      <div class="tab-content">
+      <div class="tab-content" [class.slide-from-right]="tabDir==='right'" [class.slide-from-left]="tabDir==='left'">
         <div class="controls-row">
           <div class="control-group">
             <label>From</label>
@@ -54,22 +54,39 @@
           </div>
           <div class="control-group">
             <label>Currency</label>
-            <select [(ngModel)]="ratesCurrency" (change)="onCurrencyChange()">
-              @for (c of currencies; track c) {
-                <option [value]="c">{{ c === 'all' ? 'All Currencies' : c }}</option>
+            <div class="ccy-select" [class.open]="showCurrencyMenu">
+              <button type="button" class="ccy-trigger" (click)="toggleCurrencyMenu($event)">
+                <span class="ccy-badge">{{ currencyMeta(ratesCurrency).code }}</span>
+                <span class="ccy-trigger-name">{{ currencyMeta(ratesCurrency).name }}</span>
+                <span class="mi ccy-caret">expand_more</span>
+              </button>
+              @if (showCurrencyMenu) {
+                <div class="ccy-backdrop" (click)="showCurrencyMenu=false"></div>
+                <ul class="ccy-menu" role="listbox">
+                  @for (c of currencies; track c) {
+                    <li role="option" [attr.aria-selected]="c===ratesCurrency" [class.sel]="c===ratesCurrency" (click)="selectCurrency(c)">
+                      <span class="ccy-badge">{{ currencyMeta(c).code }}</span>
+                      <span class="ccy-opt-text">
+                        <strong>{{ currencyMeta(c).name }}</strong>
+                        <small>{{ c === 'all' ? 'Show every pair' : c }}</small>
+                      </span>
+                      @if (c===ratesCurrency) { <span class="mi ccy-check">check</span> }
+                    </li>
+                  }
+                </ul>
               }
-            </select>
+            </div>
           </div>
 
           <div class="btn-group">
             <button class="btn btn-outline" [class.spinning]="ratesRefreshing" (click)="refreshRates()" [disabled]="ratesRefreshing">
-              <span class="refresh-icon" [class.spin]="ratesRefreshing">↻</span>
+              <span class="refresh-icon mi" [class.spin]="ratesRefreshing">refresh</span>
               @if (ratesRefreshing) { Refreshing... } @else { Refresh }
             </button>
 
             <div class="download-group">
               <button class="btn btn-ghost" (click)="openDownloadDialog()" [disabled]="!!downloadingFormat">
-                @if (downloadingFormat) { <span class="spinner"></span> Preparing... } @else { ⬇ Download }
+                @if (downloadingFormat) { <span class="spinner"></span> Preparing... } @else { <span class="mi">download</span> Download }
               </button>
             </div>
           </div>
@@ -82,7 +99,7 @@
           </div>
         } @else if (rates.length === 0) {
           <div class="empty-state">
-            <div class="empty-icon">📊</div>
+            <div class="empty-icon"><span class="mi">bar_chart</span></div>
             <p>No rates found for selected range</p>
           </div>
         } @else {
@@ -114,7 +131,7 @@
               Showing {{ ratesRangeStart }}-{{ ratesRangeEnd }} of {{ ratesTotal }} rates
             </div>
             <div class="pagination-controls">
-              <button class="page-btn nav-btn" (click)="prevPage()" [disabled]="ratesPage === 1" aria-label="Previous page">←</button>
+              <button class="page-btn nav-btn" (click)="prevPage()" [disabled]="ratesPage === 1" aria-label="Previous page"><span class="mi">chevron_left</span></button>
 
               @if (visibleRatePages[0] > 1) {
                 <button class="page-btn" (click)="goToRatesPage(1)">1</button>
@@ -139,16 +156,16 @@
                 <button class="page-btn" (click)="goToRatesPage(ratesTotalPages)">{{ ratesTotalPages }}</button>
               }
 
-              <button class="page-btn nav-btn" (click)="nextPage()" [disabled]="ratesPage === ratesTotalPages" aria-label="Next page">→</button>
+              <button class="page-btn nav-btn" (click)="nextPage()" [disabled]="ratesPage === ratesTotalPages" aria-label="Next page"><span class="mi">chevron_right</span></button>
             </div>
           </div>
         }
       </div>
     }
 
-    <!-- MANUAL UPDATE TAB -->
+    <!-- AUTO PROCESS TAB -->
     @if (activeTab === 'processing') {
-      <div class="tab-content">
+      <div class="tab-content" [class.slide-from-right]="tabDir==='right'" [class.slide-from-left]="tabDir==='left'">
 
         <!-- Upload Zone -->
         <div class="upload-card card">
@@ -172,18 +189,18 @@
 
             @if (!selectedFile) {
               <div class="drop-content">
-                <div class="drop-icon">📁</div>
+                <div class="drop-icon"><span class="mi">folder</span></div>
                 <p>Drop your XLSX or CSV file here, or <strong>click to browse</strong></p>
                 <span class="text-secondary text-sm">Supported: .xlsx, .csv</span>
               </div>
             } @else {
               <div class="file-info">
-                <div class="file-icon">📄</div>
+                <div class="file-icon"><span class="mi">description</span></div>
                 <div>
                   <strong>{{ selectedFile.name }}</strong>
                   <span class="text-secondary text-sm">{{ formatBytes(selectedFile.size) }}</span>
                 </div>
-                <button class="remove-btn" (click)="$event.stopPropagation(); clearFile()">✕</button>
+                <button class="remove-btn" (click)="$event.stopPropagation(); clearFile()"><span class="mi">close</span></button>
               </div>
             }
           </div>
@@ -192,12 +209,12 @@
             <button class="btn btn-primary" [disabled]="!selectedFile || processing" (click)="processFile()" style="position: relative; overflow: hidden;">
               @if (processing) {
                 <div class="progress-fill" [style.width.%]="progressPercent"></div>
-                <span class="btn-text" style="position: relative; z-index: 1;">⚡ {{ progressPercent }}% Processing...</span>
+                <span class="btn-text" style="position: relative; z-index: 1;"><span class="mi">bolt</span> {{ progressPercent }}% Processing...</span>
               } @else {
-                <span class="btn-text">⚡ Process File</span>
+                <span class="btn-text"><span class="mi">bolt</span> Process File</span>
               }
             </button>
-            <button class="btn btn-ghost" (click)="openHistory()">📋 View History</button>
+            <button class="btn btn-ghost" (click)="openHistory()"><span class="mi">history</span> View History</button>
           </div>
         </div>
       </div>
@@ -216,29 +233,20 @@
 </div>
 
 
-<!-- DOWNLOAD FORMAT MODAL -->
+<!-- LIVE RATES DOWNLOAD FORMAT MODAL — format names only (same as Auto Process) -->
 @if (showDownloadModal) {
-  <div class="modal-backdrop" (click)="showDownloadModal=false">
-    <div class="modal download-modal" (click)="$event.stopPropagation()">
-      <button class="modal-close" type="button" (click)="showDownloadModal=false">✕</button>
-      <div class="modal-kicker">Export rates</div>
-      <h2>Choose download format</h2>
-      <p class="text-secondary mt-8">Download the currently selected date range as a clean report.</p>
-      <div class="format-grid mt-24">
-        <button class="format-card" type="button" (click)="downloadRates('csv')" [disabled]="!!downloadingFormat">
-          <span class="format-icon">CSV</span>
-          <strong>CSV File</strong>
-          <small>Spreadsheet-friendly raw data</small>
+  <div class="modal-backdrop format-picker-backdrop" (click)="showDownloadModal=false">
+    <div class="modal format-only-modal" (click)="$event.stopPropagation()">
+      <button class="modal-close" type="button" (click)="showDownloadModal=false"><span class="mi">close</span></button>
+      <div class="format-name-row">
+        <button class="format-name-btn" type="button" (click)="downloadRates('xlsx')" [disabled]="!!downloadingFormat">
+          @if (downloadingFormat==='xlsx') { <span class="spinner"></span> } @else { XLS }
         </button>
-        <button class="format-card" type="button" (click)="downloadRates('xlsx')" [disabled]="!!downloadingFormat">
-          <span class="format-icon">XLS</span>
-          <strong>Excel Workbook</strong>
-          <small>Formatted workbook export</small>
+        <button class="format-name-btn" type="button" (click)="downloadRates('csv')" [disabled]="!!downloadingFormat">
+          @if (downloadingFormat==='csv') { <span class="spinner"></span> } @else { CSV }
         </button>
-        <button class="format-card" type="button" (click)="downloadRates('pdf')" [disabled]="!!downloadingFormat">
-          <span class="format-icon">PDF</span>
-          <strong>PDF Report</strong>
-          <small>Shareable snapshot report</small>
+        <button class="format-name-btn" type="button" (click)="downloadRates('pdf')" [disabled]="!!downloadingFormat">
+          @if (downloadingFormat==='pdf') { <span class="spinner"></span> } @else { PDF }
         </button>
       </div>
     </div>
@@ -249,7 +257,7 @@
 @if (showResultModal && processResult) {
   <div class="modal-backdrop" (click)="showResultModal=false">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h2>✅ Processing Complete</h2>
+      <h2><span class="mi">check_circle</span> Processing Complete</h2>
       <div class="result-stats mt-24">
         <div class="stat-card">
           <div class="stat-num">{{ processResult.stats?.total_rows || 0 }}</div>
@@ -273,7 +281,7 @@
 
       @if (processResult.stats?.skipped_no_date > 0) {
         <p class="skip-note mt-16">
-          ⚠️ {{ processResult.stats.skipped_no_date }} row(s) had a currency but no date, so no reference rate could be looked up.
+          <span class="mi">warning</span> {{ processResult.stats.skipped_no_date }} row(s) had a currency but no date, so no reference rate could be looked up.
           Add a valid date to those rows in your file to include them. "Total Rows" counts only rows that have a date.
         </p>
       }
@@ -290,7 +298,7 @@
       }
 
       <div class="modal-actions mt-24">
-        <button class="btn btn-primary" (click)="downloadResult()">⬇ Download Processed File</button>
+        <button class="btn btn-primary" (click)="downloadResult()"><span class="mi">download</span> Download Processed File</button>
         <button class="btn btn-ghost" (click)="showResultModal=false; clearFile()">Close</button>
       </div>
     </div>
@@ -301,7 +309,7 @@
 @if (showFormatModal) {
   <div class="modal-backdrop format-picker-backdrop" (click)="showFormatModal=false">
     <div class="modal format-only-modal" (click)="$event.stopPropagation()">
-      <button class="modal-close" type="button" (click)="showFormatModal=false">✕</button>
+      <button class="modal-close" type="button" (click)="showFormatModal=false"><span class="mi">close</span></button>
       <div class="format-name-row">
         <button class="format-name-btn" type="button" (click)="downloadInFormat('xlsx')" [disabled]="!!downloadingFmt">
           @if (downloadingFmt==='xlsx') { <span class="spinner"></span> } @else { XLS }
@@ -361,7 +369,7 @@
       </div>
 
       <div class="guide-section mt-16">
-        <h4>📎 Sample files</h4>
+        <h4><span class="mi">attach_file</span> Sample files</h4>
         <p class="text-secondary" style="margin:4px 0 12px;font-size:13px">Download a ready-made example to see exactly what to upload and what you'll get back.</p>
         <div class="sample-files">
           <a class="sample-file" href="/samples/sample-input.xlsx" download="sample-input.xlsx">
@@ -370,7 +378,7 @@
               <strong>Sample input template</strong>
               <small>Excel (.xlsx) — the format to upload</small>
             </span>
-            <span class="sample-dl">⬇</span>
+            <span class="sample-dl"><span class="mi">download</span></span>
           </a>
           <a class="sample-file" href="/samples/sample-input.csv" download="sample-input.csv">
             <span class="sample-badge upload">Upload me</span>
@@ -378,7 +386,7 @@
               <strong>Sample input template</strong>
               <small>CSV (.csv) — same template, CSV form</small>
             </span>
-            <span class="sample-dl">⬇</span>
+            <span class="sample-dl"><span class="mi">download</span></span>
           </a>
           <a class="sample-file" href="/samples/sample-processed.xlsx" download="sample-processed.xlsx">
             <span class="sample-badge result">You get</span>
@@ -386,7 +394,7 @@
               <strong>Sample processed result</strong>
               <small>Excel (.xlsx) — with Ref Rate filled in</small>
             </span>
-            <span class="sample-dl">⬇</span>
+            <span class="sample-dl"><span class="mi">download</span></span>
           </a>
         </div>
       </div>
@@ -403,10 +411,10 @@
   <div class="modal-backdrop" (click)="showHistoryModal=false">
     <div class="modal modal-lg" (click)="$event.stopPropagation()">
       <div style="display:flex; justify-content:space-between; align-items:center;">
-        <h2 style="margin:0">📋 Processed Files History</h2>
+        <h2 style="margin:0"><span class="mi">history</span> Processed Files History</h2>
         @if (selectedFileIds.size > 0) {
           <button class="btn btn-danger" style="padding:6px 12px;font-size:13px" (click)="confirmBulkDelete()">
-            🗑 Delete Selected ({{ selectedFileIds.size }})
+            <span class="mi">delete</span> Delete Selected ({{ selectedFileIds.size }})
           </button>
         }
       </div>
@@ -441,12 +449,12 @@
                   <td><span class="badge {{ f.status === 'completed' ? 'approved' : 'pending' }}">{{ f.status }}</span></td>
                   <td>
                     <button class="btn btn-ghost download-icon-btn" style="padding:6px 12px;font-size:12px" (click)="downloadHistoryFile(f)" title="Download as xlsx, csv or pdf" [disabled]="f.status !== 'completed'">
-                      ⬇
+                      <span class="mi">download</span>
                     </button>
                   </td>
                   <td>
                     <button class="btn btn-danger btn-ghost" style="padding:6px 12px;font-size:12px;color:var(--danger)" (click)="confirmDeleteFile(f)">
-                      🗑
+                      <span class="mi">delete</span>
                     </button>
                   </td>
                 </tr>
@@ -467,7 +475,7 @@
 @if (showProfileDetails) {
   <div class="modal-backdrop" (click)="closeProfileDetails()">
     <div class="modal profile-modal" (click)="$event.stopPropagation()">
-      <button class="modal-close" type="button" (click)="closeProfileDetails()">✕</button>
+      <button class="modal-close" type="button" (click)="closeProfileDetails()"><span class="mi">close</span></button>
       <div class="profile-hero">
         <img [src]="avatarUrl(profileForm.avatar_seed || profileForm.username)" class="profile-hero-avatar" alt="profile avatar" />
         <div>
@@ -511,7 +519,7 @@
 @if (showChangePassword) {
   <div class="modal-backdrop" (click)="showChangePassword=false">
     <div class="modal" (click)="$event.stopPropagation()">
-      <h2>🔑 Change Password</h2>
+      <h2><span class="mi">key</span> Change Password</h2>
       <div class="mt-24">
         <div class="input-group">
           <label>Current Password</label>
@@ -626,7 +634,7 @@
 <div class="toast-container">
   @for (toast of toasts; track toast.id) {
     <div class="toast {{ toast.type }}" (click)="dismissToast(toast.id)">
-      {{ toast.type === 'success' ? '✓' : toast.type === 'error' ? '✕' : toast.type === 'warning' ? '⚠' : 'ℹ' }}
+      <span class="mi">{{ toast.type === 'success' ? 'check_circle' : toast.type === 'error' ? 'error' : toast.type === 'warning' ? 'warning' : 'info' }}</span>
       {{ toast.message }}
     </div>
   }

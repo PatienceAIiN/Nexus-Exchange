@@ -165,7 +165,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.router.navigate(['/login'], { replaceUrl: true });
     }
   };
+  tabDir: 'left' | 'right' = 'right';
   setActiveTab(tab: 'rates' | 'processing'): void {
+    if (tab === this.activeTab) return;
+    // 'rates' is the left tab, 'processing' the right — slide the new panel in
+    // from the side it lives on, iOS-style.
+    this.tabDir = tab === 'processing' ? 'right' : 'left';
     this.activeTab = tab;
     if (tab === 'processing') {
       this.startInfoChipSequence();
@@ -328,6 +333,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (!this.validateAndNormalizeDateRange()) return;
     this.ratesPage = 1;
     this.loadRates();
+  }
+
+  // ── Custom currency dropdown ───────────────────────────────────────────────
+  showCurrencyMenu = false;
+
+  currencyMeta(c: string): { code: string; name: string } {
+    const m: Record<string, { code: string; name: string }> = {
+      'all':             { code: 'ALL', name: 'All currencies' },
+      'INR / 1 USD':     { code: 'USD', name: 'US Dollar' },
+      'INR / 1 GBP':     { code: 'GBP', name: 'British Pound' },
+      'INR / 1 EUR':     { code: 'EUR', name: 'Euro' },
+      'INR / 100 JPY':   { code: 'JPY', name: 'Japanese Yen' },
+      'INR / 1 AED':     { code: 'AED', name: 'UAE Dirham' },
+      'INR / 10000 IDR': { code: 'IDR', name: 'Indonesian Rupiah' },
+    };
+    return m[c] || { code: c, name: c };
+  }
+
+  toggleCurrencyMenu(e: MouseEvent): void {
+    e.stopPropagation();
+    this.showCurrencyMenu = !this.showCurrencyMenu;
+  }
+
+  selectCurrency(c: string): void {
+    this.showCurrencyMenu = false;
+    if (c === this.ratesCurrency) return;
+    this.ratesCurrency = c;
+    this.onCurrencyChange();
   }
 
   private validateAndNormalizeDateRange(): boolean {
